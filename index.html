@@ -1,1 +1,470 @@
-1
+import React, { useState, useEffect } from 'react';
+
+// --- Иконки ---
+const HomeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
+const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>;
+const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197m0 0A5.975 5.975 0 0112 13a5.975 5.975 0 013 1.803M15 21a9 9 0 00-9-5.197" /></svg>;
+const BlocksIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>;
+const ReportsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>;
+const DeleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>;
+
+// --- Переиспользуемые компоненты ---
+const Modal = ({ show, onClose, title, children }) => {
+    if (!show) return null;
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+                </div>
+                <div>{children}</div>
+            </div>
+        </div>
+    );
+};
+
+const ConfirmModal = ({ show, onClose, onConfirm, title, children }) => {
+    if (!show) return null;
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
+                <div className="text-gray-600 mb-6">{children}</div>
+                <div className="flex justify-end space-x-3">
+                    <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                        Отмена
+                    </button>
+                    <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// --- Компоненты страниц ---
+const Dashboard = ({ participants, blocks, attendance }) => {
+    // Получаем текущий год и месяц
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    // Считаем количество тренировок за текущий месяц
+    const trainingsThisMonth = Object.keys(attendance).filter(key => {
+        // Ключ имеет формат 'participantId-year-month-day'
+        const parts = key.split('-');
+        if (parts.length !== 4) return false;
+        
+        const year = parseInt(parts[1], 10);
+        const month = parseInt(parts[2], 10);
+
+        // Проверяем, что отметка true и совпадает с текущим годом и месяцем
+        return attendance[key] === true && year === currentYear && month === currentMonth;
+    }).length;
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">Дашборд</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold text-gray-700">Активные участники</h2>
+                    <p className="text-4xl font-bold text-blue-600 mt-2">{participants.length}</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold text-gray-700">Всего блоков</h2>
+                    <p className="text-4xl font-bold text-indigo-600 mt-2">{blocks.length}</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold text-gray-700">Проведено тренировок (месяц)</h2>
+                    <p className="text-4xl font-bold text-yellow-600 mt-2">{trainingsThisMonth}</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold text-gray-700">Доход (прогноз)</h2>
+                    <p className="text-4xl font-bold text-green-600 mt-2">
+                        {participants.reduce((acc, p) => acc + (blocks.find(b => b.id === p.blockId)?.cost || 0), 0)} ₽
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance, setAttendance }) => {
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+
+    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+    const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+    const toggleAttendance = (participantId, day) => {
+        const key = `${participantId}-${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${day}`;
+        setAttendance(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const handleBlockChange = (participantId, newBlockId) => {
+        setParticipants(prevParticipants =>
+            prevParticipants.map(p =>
+                p.id === participantId ? { ...p, blockId: newBlockId ? parseInt(newBlockId) : null } : p
+            )
+        );
+    };
+
+    const changeDate = (modifier) => {
+        setCurrentMonth(prevDate => {
+            const newDate = new Date(prevDate);
+            modifier(newDate);
+            return newDate;
+        });
+    };
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">Календарь посещений</h1>
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center space-x-2">
+                    <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-3 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'«'}</button>
+                    <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'<'}</button>
+                    <h2 className="text-2xl font-semibold w-48 text-center">{currentMonth.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h2>
+                    <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'>'}</button>
+                    <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-3 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'»'}</button>
+                </div>
+            </div>
+
+            <div className="overflow-x-auto bg-white rounded-lg shadow-md">
+                <table className="min-w-full text-sm text-left text-gray-600">
+                    <thead className="bg-gray-100 text-xs text-gray-700 uppercase">
+                        <tr>
+                            <th scope="col" className="px-4 py-3 sticky left-0 bg-gray-100 z-10 w-10">№</th>
+                            <th scope="col" className="px-6 py-3 sticky left-10 bg-gray-100 z-10 min-w-[250px]">ФИО Участника</th>
+                            {daysArray.map(day => <th key={day} scope="col" className="px-3 py-3 text-center w-12">{day}</th>)}
+                            <th scope="col" className="px-4 py-3 text-center">Итого</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {participants.map((p, index) => {
+                            const totalVisits = daysArray.filter(day => attendance[`${p.id}-${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${day}`]).length;
+                            return (
+                                <tr key={p.id} className="border-b hover:bg-gray-50">
+                                    <td className="px-4 py-3 sticky left-0 bg-white/80 backdrop-blur-sm">{index + 1}</td>
+                                    <td className="px-6 py-4 font-medium text-gray-900 sticky left-10 bg-white/80 backdrop-blur-sm">
+                                        <div>{p.name}</div>
+                                        <select
+                                            value={p.blockId || ''}
+                                            onChange={(e) => handleBlockChange(p.id, e.target.value)}
+                                            className="w-full mt-1 p-1 text-xs border rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
+                                        >
+                                            <option value="">Без блока</option>
+                                            {blocks.map(b => (
+                                                <option key={b.id} value={b.id}>
+                                                    {b.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                    {daysArray.map(day => (
+                                        <td key={day} className="py-3 text-center w-12">
+                                            <input
+                                                type="checkbox"
+                                                className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                checked={!!attendance[`${p.id}-${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${day}`]}
+                                                onChange={() => toggleAttendance(p.id, day)}
+                                            />
+                                        </td>
+                                    ))}
+                                    <td className="px-4 py-3 text-center font-bold text-blue-700">{totalVisits}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+const Participants = ({ participants, setParticipants, blocks }) => {
+    const [showModal, setShowModal] = useState(false);
+    const [editingParticipant, setEditingParticipant] = useState(null);
+    const [participantToDelete, setParticipantToDelete] = useState(null);
+    const [formData, setFormData] = useState({ name: '', phone: '', email: '', blockId: '' });
+
+    const handleOpenModal = (participant = null) => {
+        setEditingParticipant(participant);
+        setFormData(participant ? { ...participant } : { name: '', phone: '', email: '', blockId: blocks[0]?.id || '' });
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditingParticipant(null);
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (editingParticipant) {
+            setParticipants(participants.map(p => p.id === editingParticipant.id ? { ...p, ...formData, blockId: parseInt(formData.blockId) } : p));
+        } else {
+            setParticipants([...participants, { ...formData, id: Date.now(), blockId: parseInt(formData.blockId) }]);
+        }
+        handleCloseModal();
+    };
+    
+    const handleDelete = (id) => {
+        setParticipantToDelete(id);
+    };
+
+    const confirmDelete = () => {
+        if (!participantToDelete) return;
+        setParticipants(participants.filter(p => p.id !== participantToDelete));
+        setParticipantToDelete(null);
+    };
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">Управление участниками</h1>
+            <div className="flex justify-end items-center mb-6">
+                <button onClick={() => handleOpenModal()} className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Добавить участника</button>
+            </div>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <table className="min-w-full">
+                    <thead className="bg-gray-100">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ФИО</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Контакты</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Блок</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {participants.map(p => (
+                            <tr key={p.id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div>{p.email}</div>
+                                    <div>{p.phone}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{blocks.find(b => b.id === p.blockId)?.name || 'N/A'}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button onClick={() => handleOpenModal(p)} className="text-indigo-600 hover:text-indigo-900 mr-4"><EditIcon /></button>
+                                    <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:text-red-900"><DeleteIcon /></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <Modal show={showModal} onClose={handleCloseModal} title={editingParticipant ? "Редактировать участника" : "Добавить участника"}>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="ФИО" className="w-full p-2 border rounded-lg" required />
+                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Телефон" className="w-full p-2 border rounded-lg" />
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" className="w-full p-2 border rounded-lg" />
+                    <select name="blockId" value={formData.blockId || ''} onChange={handleChange} className="w-full p-2 border rounded-lg bg-white" required>
+                        <option value="" disabled>Выберите блок</option>
+                        {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    </select>
+                    <div className="flex justify-end space-x-3">
+                        <button type="button" onClick={handleCloseModal} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">{editingParticipant ? "Сохранить" : "Добавить"}</button>
+                    </div>
+                </form>
+            </Modal>
+            <ConfirmModal
+                show={participantToDelete !== null}
+                onClose={() => setParticipantToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Подтвердите удаление"
+            >
+                Вы уверены, что хотите удалить этого участника?
+            </ConfirmModal>
+        </div>
+    );
+};
+
+const Blocks = ({ blocks, setBlocks, participants, setParticipants }) => {
+    const [showModal, setShowModal] = useState(false);
+    const [editingBlock, setEditingBlock] = useState(null);
+    const [blockToDelete, setBlockToDelete] = useState(null);
+    const [formData, setFormData] = useState({ name: '', cost: '' });
+
+    const handleOpenModal = (block = null) => {
+        setEditingBlock(block);
+        setFormData(block ? { ...block } : { name: '', cost: '' });
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditingBlock(null);
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (editingBlock) {
+            setBlocks(blocks.map(b => b.id === editingBlock.id ? { ...b, ...formData, cost: parseFloat(formData.cost) } : b));
+        } else {
+            setBlocks([...blocks, { ...formData, id: Date.now(), cost: parseFloat(formData.cost) }]);
+        }
+        handleCloseModal();
+    };
+
+    const handleDelete = (id) => {
+        setBlockToDelete(id);
+    };
+
+    const confirmDelete = () => {
+        if (!blockToDelete) return;
+        setParticipants(prevParticipants =>
+            prevParticipants.map(p => (p.blockId === blockToDelete ? { ...p, blockId: null } : p))
+        );
+        setBlocks(prevBlocks => prevBlocks.filter(b => b.id !== blockToDelete));
+        setBlockToDelete(null);
+    };
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">Управление блоками</h1>
+            <div className="flex justify-end items-center mb-6">
+                <button onClick={() => handleOpenModal()} className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Создать блок</button>
+            </div>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <table className="min-w-full">
+                     <thead className="bg-gray-100">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название блока</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Стоимость</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {blocks.map(b => (
+                            <tr key={b.id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{b.name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{b.cost} ₽</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button onClick={() => handleOpenModal(b)} className="text-indigo-600 hover:text-indigo-900 mr-4"><EditIcon /></button>
+                                    <button onClick={() => handleDelete(b.id)} className="text-red-600 hover:text-red-900"><DeleteIcon /></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+             <Modal show={showModal} onClose={handleCloseModal} title={editingBlock ? "Редактировать блок" : "Создать блок"}>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Название блока" className="w-full p-2 border rounded-lg" required />
+                    <input type="number" name="cost" value={formData.cost} onChange={handleChange} placeholder="Стоимость" className="w-full p-2 border rounded-lg" required />
+                    <div className="flex justify-end space-x-3">
+                        <button type="button" onClick={handleCloseModal} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">{editingBlock ? "Сохранить" : "Создать"}</button>
+                    </div>
+                </form>
+            </Modal>
+            <ConfirmModal
+                show={blockToDelete !== null}
+                onClose={() => setBlockToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Подтвердите удаление"
+            >
+                Вы уверены, что хотите удалить этот блок? Все участники, приписанные к этому блоку, будут откреплены.
+            </ConfirmModal>
+        </div>
+    );
+};
+
+const Reports = () => (
+    <div>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">Отчеты и аналитика</h1>
+        <div className="bg-white rounded-lg shadow-md p-4">
+            <p className="text-gray-600">Раздел для генерации финансовых отчетов и статистики посещаемости. В разработке.</p>
+        </div>
+    </div>
+);
+
+// --- Основной компонент приложения ---
+export default function App() {
+    const [activePage, setActivePage] = useState('calendar');
+    
+    // Начальные данные из скриншота
+    const [blocks, setBlocks] = useState([
+        { id: 1, name: 'Блок 10 тренировок', cost: 25000 },
+        { id: 2, name: 'Блок 8 тренировок', cost: 20000 },
+        { id: 3, name: 'Блок 5 тренировок', cost: 14000 },
+        { id: 4, name: 'Разовая', cost: 30000 },
+    ]);
+
+    const [participants, setParticipants] = useState([
+        // Добавьте тестовых участников здесь, если нужно
+        { id: 101, name: 'Лысых Валерий', phone: '+79001234567', email: 'valery@email.com', blockId: 1 },
+        { id: 102, name: 'Сергеева Анна', phone: '+79007654321', email: 'anna@email.com', blockId: 3 },
+    ]);
+
+    const [attendance, setAttendance] = useState({});
+
+    const renderPage = () => {
+        const props = { participants, setParticipants, blocks, setBlocks, attendance, setAttendance };
+        switch (activePage) {
+            case 'dashboard': return <Dashboard {...props} />;
+            case 'calendar': return <AttendanceCalendar {...props} />;
+            case 'participants': return <Participants {...props} />;
+            case 'blocks': return <Blocks {...props} />;
+            case 'reports': return <Reports {...props} />;
+            default: return <Dashboard {...props} />;
+        }
+    };
+
+    const NavLink = ({ page, icon, children }) => (
+        <button
+            onClick={() => setActivePage(page)}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-lg w-full text-left transition-colors ${
+                activePage === page ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-200'
+            }`}
+        >
+            {icon}
+            <span className="font-medium">{children}</span>
+        </button>
+    );
+
+    return (
+        <div className="flex h-screen bg-gray-100 font-sans">
+            <aside className="w-64 bg-white p-4 flex flex-col shadow-lg">
+                <div className="text-2xl font-bold text-blue-700 mb-8 flex items-center space-x-2">
+                    <span>✅</span>
+                    <span>VisitFlow</span>
+                </div>
+                <nav className="flex flex-col space-y-2">
+                    <NavLink page="dashboard" icon={<HomeIcon />}>Дашборд</NavLink>
+                    <NavLink page="calendar" icon={<CalendarIcon />}>Календарь</NavLink>
+                    <NavLink page="participants" icon={<UsersIcon />}>Участники</NavLink>
+                    <NavLink page="blocks" icon={<BlocksIcon />}>Блоки</NavLink>
+                    <NavLink page="reports" icon={<ReportsIcon />}>Отчеты</NavLink>
+                </nav>
+                <div className="mt-auto">
+                    <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-100">
+                        <img className="h-10 w-10 rounded-full" src="https://placehold.co/100x100/E2E8F0/4A5568?text=A" alt="Admin" />
+                        <div>
+                            <p className="font-semibold text-gray-800">Администратор</p>
+                            <a href="#" className="text-sm text-blue-600 hover:underline">Выйти</a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main className="flex-1 p-8 overflow-y-auto">
+                {renderPage()}
+            </main>
+        </div>
+    );
+}
