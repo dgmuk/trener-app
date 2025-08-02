@@ -16,14 +16,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Весь ваш React-код будет здесь
         const { useState, useEffect } = React;
-
-        // --- КОНФИГУРАЦИЯ FIREBASE ---
-        // Эти ключи уже встроены в HTML-версию, но для работы с Firebase SDK
-        // их нужно было бы импортировать. В этой версии мы не используем SDK напрямую.
-        // Для простоты, мы вернемся к версии без сохранения данных, чтобы файл работал автономно.
-        // Если понадобится сохранение - нужно будет вернуться к Node.js версии.
 
         // --- Иконки ---
         const HomeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
@@ -35,6 +28,7 @@
         const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>;
         const DeleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>;
         const ArrowLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" /></svg>;
+        const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>;
 
         // --- Переиспользуемые компоненты ---
         const Modal = ({ show, onClose, title, children }) => {
@@ -100,7 +94,7 @@
                         <h1 className="text-3xl font-bold text-gray-800">Дашборд</h1>
                         <span className="text-lg text-gray-500">({selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })})</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="bg-white p-6 rounded-lg shadow-md">
                             <h2 className="text-xl font-semibold text-gray-700">Активные участники</h2>
                             <p className="text-4xl font-bold text-blue-600 mt-2">{participants.length}</p>
@@ -149,12 +143,12 @@
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800 mb-4">Календарь посещений</h1>
                     <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center space-x-2">
-                            <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-3 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'«'}</button>
-                            <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'<'}</button>
-                            <h2 className="text-2xl font-semibold w-48 text-center">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h2>
-                            <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'>'}</button>
-                            <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-3 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'»'}</button>
+                        <div className="flex items-center space-x-1 sm:space-x-2">
+                            <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-2 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'«'}</button>
+                            <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'<'}</button>
+                            <h2 className="text-lg sm:text-2xl font-semibold w-36 sm:w-48 text-center">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h2>
+                            <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'>'}</button>
+                            <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-2 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'»'}</button>
                         </div>
                     </div>
 
@@ -163,7 +157,7 @@
                             <thead className="bg-gray-100 text-xs text-gray-700 uppercase">
                                 <tr>
                                     <th scope="col" className="px-4 py-3 sticky left-0 bg-gray-100 z-10 w-10">№</th>
-                                    <th scope="col" className="px-6 py-3 sticky left-10 bg-gray-100 z-10 min-w-[250px]">ФИО Участника</th>
+                                    <th scope="col" className="px-6 py-3 sticky left-10 bg-gray-100 z-10 min-w-[200px]">ФИО Участника</th>
                                     {daysArray.map(day => <th key={day} scope="col" className="px-3 py-3 text-center w-12">{day}</th>)}
                                     <th scope="col" className="px-4 py-3 text-center">Итого</th>
                                 </tr>
@@ -263,7 +257,7 @@
                     <div className="flex justify-end items-center mb-6">
                         <button onClick={() => handleOpenModal()} className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Добавить участника</button>
                     </div>
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="bg-white rounded-lg shadow-md overflow-x-auto">
                         <table className="min-w-full">
                             <thead className="bg-gray-100">
                                 <tr>
@@ -385,7 +379,7 @@
                     <div className="flex justify-end items-center mb-6">
                         <button onClick={() => handleOpenModal()} className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Создать блок</button>
                     </div>
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="bg-white rounded-lg shadow-md overflow-x-auto">
                         <table className="min-w-full">
                             <thead className="bg-gray-100">
                                 <tr>
@@ -449,7 +443,6 @@
         };
 
         const Reports = ({ participants, blocks, attendance, rentAmount, selectedDate }) => {
-            // ... (Код компонента Reports остается без изменений) ...
             const [view, setView] = useState('overview'); 
             const [detailType, setDetailType] = useState(null);
 
@@ -535,7 +528,6 @@
         };
         
         const Charts = ({ participants, blocks, attendance, rentAmount, selectedDate, setSelectedDate }) => {
-            // ... (Код компонента Charts остается без изменений) ...
             const [view, setView] = useState('overview');
             const [detailType, setDetailType] = useState('');
 
@@ -703,8 +695,8 @@
         function App() {
             const [activePage, setActivePage] = useState('charts');
             const [selectedDate, setSelectedDate] = useState(new Date());
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
             
-            // Загрузка данных из localStorage или использование данных по умолчанию
             const [blocks, setBlocks] = useState(() => {
                 const saved = localStorage.getItem('blocks');
                 return saved ? JSON.parse(saved) : [
@@ -734,7 +726,6 @@
                 return saved ? JSON.parse(saved) : 50000;
             });
 
-            // Сохранение данных в localStorage при их изменении
             useEffect(() => {
                 localStorage.setItem('blocks', JSON.stringify(blocks));
                 localStorage.setItem('participants', JSON.stringify(participants));
@@ -757,7 +748,10 @@
 
             const NavLink = ({ page, icon, children }) => (
                 <button
-                    onClick={() => setActivePage(page)}
+                    onClick={() => {
+                        setActivePage(page);
+                        setIsMenuOpen(false); // Закрываем меню при клике
+                    }}
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg w-full text-left transition-colors ${
                         activePage === page ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-200'
                     }`}
@@ -768,9 +762,21 @@
             );
 
             return (
-                <div className="flex h-screen bg-gray-100 font-sans">
-                    <aside className="w-64 bg-white p-4 flex flex-col shadow-lg">
-                        <div className="text-2xl font-bold text-blue-700 mb-8 flex items-center space-x-2">
+                <div className="relative min-h-screen md:flex bg-gray-100 font-sans">
+                    {/* Мобильный хедер с кнопкой меню */}
+                    <div className="md:hidden flex justify-between items-center p-4 bg-white shadow-lg">
+                        <div className="text-2xl font-bold text-blue-700 flex items-center space-x-2">
+                            <span>✅</span>
+                            <span>VisitFlow</span>
+                        </div>
+                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 hover:text-gray-800">
+                            <MenuIcon />
+                        </button>
+                    </div>
+
+                    {/* Боковая панель */}
+                    <aside className={`w-64 bg-white p-4 flex-col shadow-lg fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:flex ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                        <div className="text-2xl font-bold text-blue-700 mb-8 items-center space-x-2 hidden md:flex">
                             <span>✅</span>
                             <span>VisitFlow</span>
                         </div>
@@ -793,7 +799,7 @@
                         </div>
                     </aside>
 
-                    <main className="flex-1 p-8 overflow-y-auto">
+                    <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
                         {renderPage()}
                     </main>
                 </div>
