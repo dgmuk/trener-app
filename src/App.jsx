@@ -16,15 +16,13 @@ import {
 
 // --- КОНФИГУРАЦИЯ FIREBASE ---
 const firebaseConfig = {
-  apiKey: "AIzaSyD_t9Kaj9eOjISp33Wqj_k9YqZETb21vBw",
-  authDomain: "trainer-crm-be9ea.firebaseapp.com",
-  projectId: "trainer-crm-be9ea",
-  storageBucket: "trainer-crm-be9ea.appspot.com",
-  messagingSenderId: "499615107271",
-  appId: "1:499615107271:web:370531703a115d4daa96e2",
-  measurementId: "G-1Y9Q2S7GRZ"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
-
 // Инициализация Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
