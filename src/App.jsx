@@ -11,12 +11,8 @@ import {
     getFirestore, 
     doc, 
     setDoc, 
-    getDoc,
-    collection,
-    getDocs
+    getDoc 
 } from 'firebase/firestore';
-import { format, addMonths, subMonths } from 'date-fns';
-import { ru } from 'date-fns/locale';
 
 // --- КОНФИГУРАЦИЯ FIREBASE ---
 const firebaseConfig = {
@@ -45,6 +41,7 @@ const ArrowLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h
 const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
 const RubleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-600 absolute top-0.5 right-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>;
+const DollarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-500 absolute top-0.5 right-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5m-5 7h5.5a3.5 3.5 0 000-7H9.5" /></svg>;
 
 // --- Компонент аутентификации ---
 const AuthPage = () => {
@@ -205,17 +202,8 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate }) => {
     );
 };
 
-// --- ФИНАЛЬНЫЙ КОМПОНЕНТ КАЛЕНДАРЯ ---
-// Иконка для дня оплаты
-const DollarIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-500 absolute top-0.5 right-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5m-5 7h5.5a3.5 3.5 0 000-7H9.5" />
-    </svg>
-);
-
 const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance, setAttendance, selectedDate, setSelectedDate }) => {
     const [expandedParticipant, setExpandedParticipant] = useState(null);
-    
     const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -270,7 +258,6 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
     return (
         <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Календарь посещений</h1>
-            {/* --- НАВИГАЦИЯ С КНОПКАМИ ДЛЯ ГОДА --- */}
             <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-md">
                 <div className="flex items-center space-x-1 sm:space-x-2">
                     <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-2 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'«'}</button>
@@ -342,7 +329,7 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
     );
 };
 
-const Participants = ({ participants, setParticipants, blocks }) => {
+const Participants = ({ participants, setParticipants, blocks, attendance, setAttendance }) => {
     const [showModal, setShowModal] = useState(false);
     const [editingParticipant, setEditingParticipant] = useState(null);
     const [participantToDelete, setParticipantToDelete] = useState(null);
@@ -387,26 +374,18 @@ const Participants = ({ participants, setParticipants, blocks }) => {
         setParticipantToDelete(id);
     };
 
-  const confirmDelete = () => {
+    const confirmDelete = () => {
         if (!participantToDelete) return;
-
-        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
-        // 1. Удаляем самого участника
         setParticipants(prev => prev.filter(p => p.id !== participantToDelete));
-
-        // 2. Удаляем все его посещения
         setAttendance(prevAttendance => {
             const newAttendance = { ...prevAttendance };
             Object.keys(newAttendance).forEach(key => {
-                // Ключ имеет формат "participantId-year-month-day"
                 if (key.startsWith(`${participantToDelete}-`)) {
                     delete newAttendance[key];
                 }
             });
             return newAttendance;
         });
-        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
-
         setParticipantToDelete(null);
     };
 
@@ -520,7 +499,7 @@ const Blocks = ({ blocks, setBlocks, participants, setParticipants, rentAmount, 
     };
 
     const handleDelete = (id) => {
-        if (id === 0) return; // Prevent deleting the "Без оплаты" block
+        if (id === 0) return;
         setBlockToDelete(id);
     };
 
@@ -974,10 +953,10 @@ const AppContent = ({ user, initialData }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     
-    const [blocks, setBlocks] = useState(initialData.blocks);
-    const [participants, setParticipants] = useState(initialData.participants);
-    const [attendance, setAttendance] = useState(initialData.attendance);
-    const [rentAmount, setRentAmount] = useState(initialData.rentAmount);
+    const [blocks, setBlocks] = useState(initialData.blocks || []);
+    const [participants, setParticipants] = useState(initialData.participants || []);
+    const [attendance, setAttendance] = useState(initialData.attendance || {});
+    const [rentAmount, setRentAmount] = useState(initialData.rentAmount || 0);
     
     useEffect(() => {
         const saveData = async () => {
@@ -1116,9 +1095,6 @@ export default function App() {
     if (!user) {
         return <AuthPage />;
     }
-
-    // 👇 ДОБАВЛЕНА СТРОКА ДЛЯ ОТЛАДКИ 👇
-    console.log("ДАННЫЕ ИЗ FIREBASE ПЕРЕД ОТРИСОВКОЙ:", initialData);
 
     return <AppContent user={user} initialData={initialData} />;
 }

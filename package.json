@@ -9,7 +9,7 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "predeploy": "npm run build",
+    "predeploy": "rimraf ./dist && npm run build",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.3",
     "vite": "^5.2.0"
   }
