@@ -387,9 +387,26 @@ const Participants = ({ participants, setParticipants, blocks }) => {
         setParticipantToDelete(id);
     };
 
-    const confirmDelete = () => {
+  const confirmDelete = () => {
         if (!participantToDelete) return;
-        setParticipants(participants.filter(p => p.id !== participantToDelete));
+
+        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+        // 1. Удаляем самого участника
+        setParticipants(prev => prev.filter(p => p.id !== participantToDelete));
+
+        // 2. Удаляем все его посещения
+        setAttendance(prevAttendance => {
+            const newAttendance = { ...prevAttendance };
+            Object.keys(newAttendance).forEach(key => {
+                // Ключ имеет формат "participantId-year-month-day"
+                if (key.startsWith(`${participantToDelete}-`)) {
+                    delete newAttendance[key];
+                }
+            });
+            return newAttendance;
+        });
+        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+
         setParticipantToDelete(null);
     };
 
