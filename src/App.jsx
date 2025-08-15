@@ -11,17 +11,21 @@ import {
     getFirestore, 
     doc, 
     setDoc, 
-    getDoc 
+    getDoc,
+    collection,
+    getDocs
 } from 'firebase/firestore';
+import { format, addMonths, subMonths } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 // --- КОНФИГУРАЦИЯ FIREBASE ---
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 // Инициализация Firebase
 const app = initializeApp(firebaseConfig);
@@ -201,31 +205,60 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate }) => {
     );
 };
 
+// --- ФИНАЛЬНЫЙ КОМПОНЕНТ КАЛЕНДАРЯ ---
+// Иконка для дня оплаты
+const DollarIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-500 absolute top-0.5 right-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5m-5 7h5.5a3.5 3.5 0 000-7H9.5" />
+    </svg>
+);
+
 const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance, setAttendance, selectedDate, setSelectedDate }) => {
     const [expandedParticipant, setExpandedParticipant] = useState(null);
     
     const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-
     const firstDayOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-    const startOffset = (firstDayOfMonth.getDay() + 6) % 7; // 0 for Monday, 1 for Tuesday, ..., 6 for Sunday
+    const startOffset = (firstDayOfMonth.getDay() + 6) % 7;
 
     const toggleAttendance = (participantId, day) => {
         const key = `${participantId}-${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${day}`;
         setAttendance(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
-    const handleBlockChange = (e, participantId) => {
-        e.stopPropagation();
-        const newBlockId = e.target.value;
-        setParticipants(prevParticipants =>
-            prevParticipants.map(p =>
-                p.id === participantId ? { ...p, blockId: newBlockId ? parseInt(newBlockId) : null } : p
-            )
-        );
-    };
-    
+    const [participantsData, setParticipantsData] = useState([]);
+    useEffect(() => {
+        const attendanceMap = {};
+        Object.keys(attendance).forEach(key => {
+            if (!attendance[key]) return;
+            const parts = key.split('-');
+            if (parts.length !== 4) return;
+            const participantId = parts[0];
+            if (!attendanceMap[participantId]) {
+                attendanceMap[participantId] = [];
+            }
+            attendanceMap[participantId].push({
+                year: parseInt(parts[1], 10),
+                month: parseInt(parts[2], 10),
+                day: parseInt(parts[3], 10),
+            });
+        });
+
+        const processedData = participants.map(p => {
+            const block = blocks.find(b => b.id === p.blockId) || {};
+            const totalSessions = block.trainingCount || 0;
+            const allVisits = attendanceMap[p.id] || [];
+            const totalAttendance = allVisits.length;
+            const remainingSessions = totalSessions - totalAttendance;
+            const attendedThisMonth = allVisits.filter(att => 
+                att.year === selectedDate.getFullYear() && att.month === selectedDate.getMonth()
+            ).length;
+            return { ...p, blockName: block.name || "Блок не назначен", attendedThisMonth, remainingSessions };
+        });
+        setParticipantsData(processedData);
+    }, [selectedDate, participants, blocks, attendance]);
+
     const changeDate = (modifier) => {
         setSelectedDate(prevDate => {
             const newDate = new Date(prevDate);
@@ -237,50 +270,38 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
     return (
         <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Календарь посещений</h1>
-            <div className="flex justify-between items-center mb-6">
+            {/* --- НАВИГАЦИЯ С КНОПКАМИ ДЛЯ ГОДА --- */}
+            <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-md">
                 <div className="flex items-center space-x-1 sm:space-x-2">
                     <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-2 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'«'}</button>
                     <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'<'}</button>
-                    <h2 className="text-lg sm:text-2xl font-semibold w-36 sm:w-48 text-center">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h2>
+                </div>
+                <h2 className="text-lg sm:text-2xl font-semibold w-36 sm:w-48 text-center capitalize">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h2>
+                <div className="flex items-center space-x-1 sm:space-x-2">
                     <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'>'}</button>
                     <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-2 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'»'}</button>
                 </div>
             </div>
 
-            <div className="space-y-2">
-                {participants.map((p) => {
-                     const totalVisits = daysArray.filter(day => attendance[`${p.id}-${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${day}`]).length;
-                     const isExpanded = expandedParticipant === p.id;
-
-                     const paymentDateObj = p.paymentDate ? new Date(p.paymentDate) : null;
-                     const paymentDay = paymentDateObj ? paymentDateObj.getDate() : null;
-                     const isPaymentMonth = paymentDateObj ? (paymentDateObj.getFullYear() === selectedDate.getFullYear() && paymentDateObj.getMonth() === selectedDate.getMonth()) : false;
-
-                     return (
+            <div className="space-y-4">
+                {participantsData.map(p => {
+                    const isExpanded = expandedParticipant === p.id;
+                    return (
                         <div key={p.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <div 
                                 className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
                                 onClick={() => setExpandedParticipant(isExpanded ? null : p.id)}
                             >
-                                <div className="flex-1">
-                                    <p className="font-medium text-gray-900">{p.name}</p>
-                                    <select
-                                        value={p.blockId || ''}
-                                        onChange={(e) => handleBlockChange(e, p.id)}
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="w-full max-w-[200px] mt-1 p-1 text-xs border rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        <option value="">Без блока</option>
-                                        {blocks.map(b => (
-                                            <option key={b.id} value={b.id}>{b.name}</option>
-                                        ))}
-                                    </select>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">{p.name}</h3>
+                                    <p className="text-sm text-gray-500">{p.blockName}</p>
                                 </div>
-                                <div className="flex items-center space-x-4">
-                                    <span className="text-sm font-bold text-blue-700">Посещений: {totalVisits}</span>
-                                    <div className={isExpanded ? 'transform rotate-180' : ''}>
-                                        <ChevronDownIcon />
-                                    </div>
+                                <div className="text-right">
+                                    <p className="text-sm font-semibold text-blue-600">Посещений в этом месяце: {p.attendedThisMonth}</p>
+                                    <p className="text-sm font-bold text-orange-500">Осталось тренировок: {p.remainingSessions}</p>
+                                </div>
+                                <div className={`ml-4 transition-transform duration-300 ${isExpanded ? 'transform rotate-180' : ''}`}>
+                                    <ChevronDownIcon />
                                 </div>
                             </div>
                             
@@ -290,26 +311,23 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
                                         {weekdays.map(wd => <div key={wd}>{wd}</div>)}
                                     </div>
                                     <div className="grid grid-cols-7 gap-2">
-                                        {Array.from({ length: startOffset }).map((_, index) => (
-                                            <div key={`empty-${index}`} className="p-1 rounded-lg"></div>
-                                        ))}
+                                        {Array.from({ length: startOffset }).map((_, index) => <div key={`empty-${index}`} />)}
                                         {daysArray.map(day => {
-                                            const isChecked = !!attendance[`${p.id}-${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${day}`];
-                                            const isPaymentDay = isPaymentMonth && day === paymentDay;
+                                            const key = `${p.id}-${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${day}`;
+                                            const isChecked = !!attendance[key];
+                                            const paymentDateObj = p.paymentDate ? new Date(p.paymentDate) : null;
+                                            const isPaymentDay = paymentDateObj &&
+                                                                 paymentDateObj.getFullYear() === selectedDate.getFullYear() &&
+                                                                 paymentDateObj.getMonth() === selectedDate.getMonth() &&
+                                                                 paymentDateObj.getDate() === day;
                                             return (
                                                 <div 
                                                     key={day} 
-                                                    className={`relative flex flex-col items-center justify-center p-1 rounded-lg cursor-pointer transition-colors ${isChecked ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                                                    className={`relative flex items-center justify-center p-2 rounded-lg cursor-pointer transition-colors ${isChecked ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
                                                     onClick={() => toggleAttendance(p.id, day)}
                                                 >
-                                                    {isPaymentDay && <RubleIcon />}
+                                                    {isPaymentDay && <DollarIcon />}
                                                     <span className="font-bold text-sm">{day}</span>
-                                                    <input
-                                                        type="checkbox"
-                                                        className="hidden"
-                                                        checked={isChecked}
-                                                        readOnly
-                                                    />
                                                 </div>
                                             )
                                         })}
@@ -317,7 +335,7 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
                                 </div>
                             )}
                         </div>
-                     )
+                    )
                 })}
             </div>
         </div>
@@ -416,17 +434,17 @@ const Participants = ({ participants, setParticipants, blocks }) => {
                         {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                     </select>
                      <div>
-                        <label htmlFor="paymentDate" className="block text-sm font-medium text-gray-700">Дата оплаты</label>
-                        <input
-                            type="date"
-                            id="paymentDate"
-                            name="paymentDate"
-                            value={formData.paymentDate}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
-                            disabled={parseInt(formData.blockId, 10) === 0}
-                            required={parseInt(formData.blockId, 10) !== 0}
-                        />
+                         <label htmlFor="paymentDate" className="block text-sm font-medium text-gray-700">Дата оплаты</label>
+                         <input
+                             type="date"
+                             id="paymentDate"
+                             name="paymentDate"
+                             value={formData.paymentDate}
+                             onChange={handleChange}
+                             className="w-full p-2 border rounded-lg"
+                             disabled={parseInt(formData.blockId, 10) === 0}
+                             required={parseInt(formData.blockId, 10) !== 0}
+                         />
                     </div>
                     <div className="flex justify-end space-x-3">
                         <button type="button" onClick={handleCloseModal} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
@@ -1081,6 +1099,9 @@ export default function App() {
     if (!user) {
         return <AuthPage />;
     }
+
+    // 👇 ДОБАВЛЕНА СТРОКА ДЛЯ ОТЛАДКИ 👇
+    console.log("ДАННЫЕ ИЗ FIREBASE ПЕРЕД ОТРИСОВКОЙ:", initialData);
 
     return <AppContent user={user} initialData={initialData} />;
 }
