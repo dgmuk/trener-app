@@ -39,8 +39,8 @@ const DeleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 
 const ArrowLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" /></svg>;
 const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
-const RubleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-600 absolute top-0.5 right-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>;
-const DollarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-500 absolute top-0.5 right-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5m-5 7h5.5a3.5 3.5 0 000-7H9.5" /></svg>;
+const RubleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-500 absolute top-0.5 right-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>;
+const DollarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-teal-500 absolute top-0.5 right-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5m-5 7h5.5a3.5 3.5 0 000-7H9.5" /></svg>;
 
 // --- Компонент аутентификации ---
 const AuthPage = () => {
@@ -78,22 +78,22 @@ const AuthPage = () => {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-gray-100">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold text-center text-gray-800">
+        <div className="flex items-center justify-center h-screen bg-gray-900">
+            <div className="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+                <h2 className="text-2xl font-bold text-center text-white">
                     {isLogin ? 'Вход в VisitFlow' : 'Регистрация в VisitFlow'}
                 </h2>
                 <form onSubmit={handleAuth} className="space-y-6">
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:bg-white" required />
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Пароль" className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:bg-white" required />
-                    <button type="submit" className="w-full px-4 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none">
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 border border-gray-600" required />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Пароль" className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 border border-gray-600" required />
+                    <button type="submit" className="w-full px-4 py-2 font-bold text-white bg-orange-500 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition-colors">
                         {isLogin ? 'Войти' : 'Зарегистрироваться'}
                     </button>
                     {error && <p className="text-sm text-center text-red-500">{error}</p>}
                 </form>
-                <p className="text-sm text-center text-gray-600">
+                <p className="text-sm text-center text-gray-300">
                     {isLogin ? 'Нет аккаунта?' : 'Уже есть аккаунт?'}
-                    <button onClick={() => setIsLogin(!isLogin)} className="ml-1 font-bold text-blue-600 hover:underline">
+                    <button onClick={() => setIsLogin(!isLogin)} className="ml-1 font-bold text-orange-400 hover:underline">
                         {isLogin ? 'Зарегистрироваться' : 'Войти'}
                     </button>
                 </p>
@@ -107,11 +107,11 @@ const AuthPage = () => {
 const Modal = ({ show, onClose, title, children }) => {
     if (!show) return null;
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center">
+            <div className="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md border border-gray-700">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+                    <h3 className="text-xl font-semibold text-white">{title}</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
                 </div>
                 <div>{children}</div>
             </div>
@@ -122,12 +122,12 @@ const Modal = ({ show, onClose, title, children }) => {
 const ConfirmModal = ({ show, onClose, onConfirm, title, children }) => {
     if (!show) return null;
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
-                <div className="text-gray-600 mb-6">{children}</div>
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center">
+            <div className="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm border border-gray-700">
+                <h3 className="text-xl font-semibold text-white mb-4">{title}</h3>
+                <div className="text-gray-300 mb-6">{children}</div>
                 <div className="flex justify-end space-x-3">
-                    <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Отмена</button>
+                    <button onClick={onClose} className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">Отмена</button>
                     <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Удалить</button>
                 </div>
             </div>
@@ -165,21 +165,21 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate }) => {
     return (
         <div>
             <div className="flex items-baseline space-x-2 mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">Дашборд</h1>
-                <span className="text-lg text-gray-500">({selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })})</span>
+                <h1 className="text-3xl font-bold text-white">Дашборд</h1>
+                <span className="text-lg text-gray-400">({selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })})</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-gray-700">Активные участники</h2>
-                    <p className="text-4xl font-bold text-blue-600 mt-2">{participants.length}</p>
+                <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors">
+                    <h2 className="text-xl font-semibold text-gray-300">Активные участники</h2>
+                    <p className="text-4xl font-bold text-orange-500 mt-2">{participants.length}</p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-gray-700">Проведено тренировок</h2>
-                    <p className="text-4xl font-bold text-yellow-600 mt-2">{trainingsThisMonth}</p>
+                <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors">
+                    <h2 className="text-xl font-semibold text-gray-300">Проведено тренировок</h2>
+                    <p className="text-4xl font-bold text-orange-500 mt-2">{trainingsThisMonth}</p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-gray-700">Доход (Оплаты)</h2>
-                    <p className="text-4xl font-bold text-green-600 mt-2">{incomeThisMonth.toLocaleString('ru-RU')} ₽</p>
+                <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors">
+                    <h2 className="text-xl font-semibold text-gray-300">Доход (Оплаты)</h2>
+                    <p className="text-4xl font-bold text-green-500 mt-2">{incomeThisMonth.toLocaleString('ru-RU')} ₽</p>
                 </div>
             </div>
         </div>
@@ -219,29 +219,17 @@ const AttendanceCalendar = ({ participants, blocks, attendance, setAttendance, s
 
         const processedData = participants.map(p => {
             const participantPayments = p.payments || [];
-            
             const totalSessions = participantPayments.reduce((sum, payment) => {
                 const block = blocks.find(b => b.id === payment.blockId);
                 return sum + (block ? block.trainingCount : 0);
             }, 0);
-
             const allVisits = attendanceMap[p.id] || [];
             const totalAttendance = allVisits.length;
             const remainingSessions = totalSessions - totalAttendance;
-
-            const attendedThisMonth = allVisits.filter(att => 
-                att.year === selectedDate.getFullYear() && att.month === selectedDate.getMonth()
-            ).length;
-            
+            const attendedThisMonth = allVisits.filter(att => att.year === selectedDate.getFullYear() && att.month === selectedDate.getMonth()).length;
             const lastPayment = participantPayments.length > 0 ? participantPayments[participantPayments.length - 1] : null;
             const lastBlock = lastPayment ? blocks.find(b => b.id === lastPayment.blockId) : null;
-
-            return { 
-                ...p, 
-                blockName: lastBlock ? lastBlock.name : "Блок не назначен", 
-                attendedThisMonth, 
-                remainingSessions 
-            };
+            return { ...p, blockName: lastBlock ? lastBlock.name : "Блок не назначен", attendedThisMonth, remainingSessions };
         });
         setParticipantsData(processedData);
     }, [selectedDate, participants, blocks, attendance]);
@@ -256,16 +244,16 @@ const AttendanceCalendar = ({ participants, blocks, attendance, setAttendance, s
 
     return (
         <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Календарь посещений</h1>
-            <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-md">
+            <h1 className="text-3xl font-bold text-white mb-4">Календарь посещений</h1>
+            <div className="flex justify-between items-center mb-6 bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
                 <div className="flex items-center space-x-1 sm:space-x-2">
-                    <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-2 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'«'}</button>
-                    <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'<'}</button>
+                    <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-2 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">{'«'}</button>
+                    <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{'<'}</button>
                 </div>
-                <h2 className="text-lg sm:text-2xl font-semibold w-36 sm:w-48 text-center capitalize">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h2>
+                <h2 className="text-lg sm:text-2xl font-semibold w-36 sm:w-48 text-center capitalize text-white">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h2>
                 <div className="flex items-center space-x-1 sm:space-x-2">
-                    <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'>'}</button>
-                    <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-2 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-bold">{'»'}</button>
+                    <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{'>'}</button>
+                    <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-2 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">{'»'}</button>
                 </div>
             </div>
 
@@ -274,27 +262,24 @@ const AttendanceCalendar = ({ participants, blocks, attendance, setAttendance, s
                     const isExpanded = expandedParticipant === p.id;
                     const participantPayments = p.payments || [];
                     return (
-                        <div key={p.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                            <div 
-                                className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
-                                onClick={() => setExpandedParticipant(isExpanded ? null : p.id)}
-                            >
+                        <div key={p.id} className="bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700 hover:border-teal-500 transition-colors">
+                            <div className="p-4 flex justify-between items-center cursor-pointer" onClick={() => setExpandedParticipant(isExpanded ? null : p.id)}>
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900">{p.name}</h3>
-                                    <p className="text-sm text-gray-500">{p.blockName}</p>
+                                    <h3 className="text-lg font-bold text-white">{p.name}</h3>
+                                    <p className="text-sm text-gray-300">{p.blockName}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-semibold text-blue-600">Посещений в этом месяце: {p.attendedThisMonth}</p>
-                                    <p className="text-sm font-bold text-orange-500">Осталось тренировок: {p.remainingSessions}</p>
+                                    <p className="text-sm font-semibold text-gray-300">Посещений в этом месяце: {p.attendedThisMonth}</p>
+                                    <p className="text-sm font-bold text-orange-400">Осталось тренировок: {p.remainingSessions}</p>
                                 </div>
-                                <div className={`ml-4 transition-transform duration-300 ${isExpanded ? 'transform rotate-180' : ''}`}>
+                                <div className={`ml-4 transition-transform duration-300 text-white ${isExpanded ? 'transform rotate-180' : ''}`}>
                                     <ChevronDownIcon />
                                 </div>
                             </div>
                             
                             {isExpanded && (
-                                <div className="p-4 border-t border-gray-200 bg-gray-50">
-                                    <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-500 mb-2">
+                                <div className="p-4 border-t border-gray-700 bg-gray-900">
+                                    <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-400 mb-2">
                                         {weekdays.map(wd => <div key={wd}>{wd}</div>)}
                                     </div>
                                     <div className="grid grid-cols-7 gap-2">
@@ -311,7 +296,7 @@ const AttendanceCalendar = ({ participants, blocks, attendance, setAttendance, s
                                             return (
                                                 <div 
                                                     key={day} 
-                                                    className={`relative flex items-center justify-center p-2 rounded-lg cursor-pointer transition-colors ${isChecked ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                                                    className={`relative flex items-center justify-center p-2 rounded-lg cursor-pointer transition-colors ${isChecked ? 'bg-orange-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
                                                     onClick={() => toggleAttendance(p.id, day)}
                                                 >
                                                     {isPaymentDay && <DollarIcon />}
@@ -399,34 +384,34 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
 
     return (
         <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Управление участниками</h1>
-            <div className="flex justify-end items-center mb-6">
-                <button onClick={handleOpenAddModal} className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Добавить участника</button>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-white">Управление участниками</h1>
+                <button onClick={handleOpenAddModal} className="px-5 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">Добавить участника</button>
             </div>
-            <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+            <div className="bg-gray-800 rounded-lg shadow-lg overflow-x-auto border border-gray-700">
                 <table className="min-w-full">
-                    <thead className="bg-gray-100">
+                    <thead className="bg-gray-900">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ФИО</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата последней оплаты</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Последний блок</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ФИО</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Дата последней оплаты</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Последний блок</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Действия</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-700">
                         {participants.map(p => {
                             const lastPayment = p.payments && p.payments.length > 0 ? p.payments[p.payments.length - 1] : null;
                             const lastBlock = lastPayment ? blocks.find(b => b.id === lastPayment.blockId) : null;
                             return (
-                                <tr key={p.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <tr key={p.id} className="hover:bg-gray-700">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{p.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                         {lastPayment ? new Date(lastPayment.paymentDate).toLocaleDateString('ru-RU') : '---'}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lastBlock ? lastBlock.name : 'N/A'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{lastBlock ? lastBlock.name : 'N/A'}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onClick={() => handleOpenPaymentModal(p)} className="text-indigo-600 hover:text-indigo-900 mr-4"><EditIcon /></button>
-                                        <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:text-red-900"><DeleteIcon /></button>
+                                        <button onClick={() => handleOpenPaymentModal(p)} className="text-orange-400 hover:text-orange-500 mr-4"><EditIcon /></button>
+                                        <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-600"><DeleteIcon /></button>
                                     </td>
                                 </tr>
                             )
@@ -437,35 +422,35 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
 
             <Modal show={showAddParticipantModal} onClose={handleCloseModals} title="Добавить участника">
                 <form onSubmit={handleAddParticipant} className="space-y-4">
-                    <input type="text" name="name" value={newParticipantData.name} onChange={(e) => setNewParticipantData({name: e.target.value})} placeholder="ФИО" className="w-full p-2 border rounded-lg" required />
+                    <input type="text" name="name" value={newParticipantData.name} onChange={(e) => setNewParticipantData({name: e.target.value})} placeholder="ФИО" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
                     <div className="flex justify-end space-x-3">
-                        <button type="button" onClick={handleCloseModals} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Добавить</button>
+                        <button type="button" onClick={handleCloseModals} className="px-4 py-2 bg-gray-700 rounded-lg">Отмена</button>
+                        <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Добавить</button>
                     </div>
                 </form>
             </Modal>
             
             <Modal show={showAddPaymentModal} onClose={handleCloseModals} title={`Добавить оплату для: ${participantToEdit?.name}`}>
                 <form onSubmit={handleAddPayment} className="space-y-4">
-                    <select name="blockId" value={newPaymentData.blockId} onChange={(e) => setNewPaymentData({...newPaymentData, blockId: e.target.value})} className="w-full p-2 border rounded-lg bg-white" required>
+                    <select name="blockId" value={newPaymentData.blockId} onChange={(e) => setNewPaymentData({...newPaymentData, blockId: e.target.value})} className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required>
                         <option value="" disabled>Выберите блок</option>
                         {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                     </select>
                      <div>
-                         <label htmlFor="paymentDate" className="block text-sm font-medium text-gray-700">Дата оплаты</label>
+                         <label htmlFor="paymentDate" className="block text-sm font-medium text-gray-300">Дата оплаты</label>
                          <input
                              type="date"
                              id="paymentDate"
                              name="paymentDate"
                              value={newPaymentData.paymentDate}
                              onChange={(e) => setNewPaymentData({...newPaymentData, paymentDate: e.target.value})}
-                             className="w-full p-2 border rounded-lg"
+                             className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500"
                              required
                          />
                     </div>
                     <div className="flex justify-end space-x-3">
-                        <button type="button" onClick={handleCloseModals} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Добавить оплату</button>
+                        <button type="button" onClick={handleCloseModals} className="px-4 py-2 bg-gray-700 rounded-lg">Отмена</button>
+                        <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Добавить оплату</button>
                     </div>
                 </form>
             </Modal>
@@ -534,31 +519,31 @@ const Blocks = ({ blocks, setBlocks, participants, setParticipants, rentAmount, 
 
     return (
         <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Управление блоками</h1>
+            <h1 className="text-3xl font-bold text-white mb-6">Управление блоками</h1>
             <div className="flex justify-end items-center mb-6">
-                <button onClick={() => handleOpenModal()} className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Создать блок</button>
+                <button onClick={() => handleOpenModal()} className="px-5 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Создать блок</button>
             </div>
-            <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+            <div className="bg-gray-800 rounded-lg shadow-lg overflow-x-auto border border-gray-700">
                 <table className="min-w-full">
-                    <thead className="bg-gray-100">
+                    <thead className="bg-gray-900">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название блока</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Стоимость</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кол-во тренировок</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Название блока</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Стоимость</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Кол-во тренировок</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Действия</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-700">
                         {blocks.map(b => (
-                            <tr key={b.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{b.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{b.cost.toLocaleString('ru-RU')} ₽</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{b.trainingCount}</td>
+                            <tr key={b.id} className="hover:bg-gray-700">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{b.name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{b.cost.toLocaleString('ru-RU')} ₽</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{b.trainingCount}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     {b.id !== 0 && (
                                         <>
-                                            <button onClick={() => handleOpenModal(b)} className="text-indigo-600 hover:text-indigo-900 mr-4"><EditIcon /></button>
-                                            <button onClick={() => handleDelete(b.id)} className="text-red-600 hover:text-red-900"><DeleteIcon /></button>
+                                            <button onClick={() => handleOpenModal(b)} className="text-orange-400 hover:text-orange-500 mr-4"><EditIcon /></button>
+                                            <button onClick={() => handleDelete(b.id)} className="text-red-500 hover:text-red-600"><DeleteIcon /></button>
                                         </>
                                     )}
                                 </td>
@@ -567,25 +552,25 @@ const Blocks = ({ blocks, setBlocks, participants, setParticipants, rentAmount, 
                     </tbody>
                 </table>
             </div>
-            <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-xl font-semibold text-gray-700 mb-4">Расходы</h2>
-                <label className="block text-sm font-medium text-gray-700">Сумма аренды в месяц</label>
+            <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <h2 className="text-xl font-semibold text-white mb-4">Расходы</h2>
+                <label className="block text-sm font-medium text-gray-300">Сумма аренды в месяц</label>
                 <input 
                     type="number"
                     value={rentAmount}
                     onChange={(e) => setRentAmount(parseFloat(e.target.value) || 0)}
-                    className="mt-1 block w-full p-2 border rounded-lg"
+                    className="mt-1 block w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Введите сумму аренды"
                 />
             </div>
             <Modal show={showModal} onClose={handleCloseModal} title={editingBlock ? "Редактировать блок" : "Создать блок"}>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Название блока" className="w-full p-2 border rounded-lg" required />
-                    <input type="number" name="cost" value={formData.cost} onChange={handleChange} placeholder="Стоимость" className="w-full p-2 border rounded-lg" required />
-                    <input type="number" name="trainingCount" value={formData.trainingCount} onChange={handleChange} placeholder="Количество тренировок" className="w-full p-2 border rounded-lg" required />
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Название блока" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
+                    <input type="number" name="cost" value={formData.cost} onChange={handleChange} placeholder="Стоимость" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
+                    <input type="number" name="trainingCount" value={formData.trainingCount} onChange={handleChange} placeholder="Количество тренировок" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
                     <div className="flex justify-end space-x-3">
-                        <button type="button" onClick={handleCloseModal} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">{editingBlock ? "Сохранить" : "Добавить"}</button>
+                        <button type="button" onClick={handleCloseModal} className="px-4 py-2 bg-gray-700 rounded-lg">Отмена</button>
+                        <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{editingBlock ? "Сохранить" : "Добавить"}</button>
                     </div>
                 </form>
             </Modal>
@@ -615,23 +600,23 @@ const ReportDetails = ({ onBack, detailType, reportData, totalSales, netProfit, 
                 return (
                     <div className="overflow-x-auto">
                         <table className="min-w-full">
-                            <thead className="bg-gray-100">
+                            <thead className="bg-gray-900">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ФИО Участника</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Блок</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Стоимость 1 тренировки</th>
-                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Посещено (месяц)</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Реализация (месяц)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ФИО Участника</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Блок</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Стоимость 1 тренировки</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">Посещено (месяц)</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Реализация (месяц)</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-gray-800 divide-y divide-gray-700">
                                 {reportData.map(p => (
                                     <tr key={p.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.blockName}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.costPerTraining.toFixed(2)} ₽</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center font-bold">{p.attendedThisMonth}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-bold">{p.salesThisMonth.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{p.name}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{p.blockName}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{p.costPerTraining.toFixed(2)} ₽</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 text-center font-bold">{p.attendedThisMonth}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white text-right font-bold">{p.salesThisMonth.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -640,45 +625,45 @@ const ReportDetails = ({ onBack, detailType, reportData, totalSales, netProfit, 
                 );
             case 'totalSales':
                 return (
-                    <div className="p-8 text-center border rounded-lg">
-                        <h3 className="text-lg font-medium text-gray-500">Общая прибыль за месяц</h3>
-                        <p className="mt-2 text-5xl font-bold text-blue-600">{totalSales.toLocaleString('ru-RU')} ₽</p>
+                    <div className="p-8 text-center border border-gray-700 rounded-lg">
+                        <h3 className="text-lg font-medium text-gray-300">Общая прибыль за месяц</h3>
+                        <p className="mt-2 text-5xl font-bold text-orange-500">{totalSales.toLocaleString('ru-RU')} ₽</p>
                     </div>
                 );
             case 'netProfit':
                 return (
-                    <div className="p-8 border rounded-lg">
-                        <dl className="divide-y divide-gray-200">
+                    <div className="p-8 border border-gray-700 rounded-lg">
+                        <dl className="divide-y divide-gray-700">
                             <div className="flex justify-between py-3">
-                                <dt className="text-lg text-gray-600">Общая прибыль</dt>
-                                <dd className="text-lg font-medium text-blue-600">{totalSales.toLocaleString('ru-RU')} ₽</dd>
+                                <dt className="text-lg text-gray-300">Общая прибыль</dt>
+                                <dd className="text-lg font-medium text-orange-500">{totalSales.toLocaleString('ru-RU')} ₽</dd>
                             </div>
                             <div className="flex justify-between py-3">
-                                <dt className="text-lg text-gray-600">Сумма аренды</dt>
+                                <dt className="text-lg text-gray-300">Сумма аренды</dt>
                                 <dd className="text-lg font-medium text-red-500">- {rentAmount.toLocaleString('ru-RU')} ₽</dd>
                             </div>
                             <div className="flex justify-between py-4">
-                                <dt className="text-xl font-bold text-gray-800">Чистая прибыль</dt>
-                                <dd className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>{netProfit.toLocaleString('ru-RU')} ₽</dd>
+                                <dt className="text-xl font-bold text-white">Чистая прибыль</dt>
+                                <dd className={`text-xl font-bold ${netProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{netProfit.toLocaleString('ru-RU')} ₽</dd>
                             </div>
                         </dl>
                     </div>
                 );
             case 'avgCost':
                 return (
-                    <div className="p-8 border rounded-lg">
-                        <dl className="divide-y divide-gray-200">
+                    <div className="p-8 border border-gray-700 rounded-lg">
+                        <dl className="divide-y divide-gray-700">
                             <div className="flex justify-between py-3">
-                                <dt className="text-lg text-gray-600">Общая прибыль</dt>
-                                <dd className="text-lg font-medium text-gray-800">{totalSales.toLocaleString('ru-RU')} ₽</dd>
+                                <dt className="text-lg text-gray-300">Общая прибыль</dt>
+                                <dd className="text-lg font-medium text-white">{totalSales.toLocaleString('ru-RU')} ₽</dd>
                             </div>
                             <div className="flex justify-between py-3">
-                                <dt className="text-lg text-gray-600">Количество тренировок</dt>
-                                <dd className="text-lg font-medium text-gray-800">{totalTrainings}</dd>
+                                <dt className="text-lg text-gray-300">Количество тренировок</dt>
+                                <dd className="text-lg font-medium text-white">{totalTrainings}</dd>
                             </div>
                             <div className="flex justify-between py-4">
-                                <dt className="text-xl font-bold text-gray-800">Средняя стоимость тренировки</dt>
-                                <dd className="text-xl font-bold text-purple-600">{avgTrainingCost.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</dd>
+                                <dt className="text-xl font-bold text-white">Средняя стоимость тренировки</dt>
+                                <dd className="text-xl font-bold text-teal-500">{avgTrainingCost.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</dd>
                             </div>
                         </dl>
                     </div>
@@ -689,16 +674,16 @@ const ReportDetails = ({ onBack, detailType, reportData, totalSales, netProfit, 
     };
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-md">
-            <button onClick={onBack} className="flex items-center mb-6 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+            <button onClick={onBack} className="flex items-center mb-6 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
                 <ArrowLeftIcon />
                 Назад к отчетам
             </button>
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4">{titles[detailType]}</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">{titles[detailType]}</h2>
             <div className="flex items-center space-x-2 mb-6">
-                <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'<'}</button>
-                <h3 className="text-xl font-semibold w-48 text-center">{reportDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h3>
-                <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'>'}</button>
+                <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{'<'}</button>
+                <h3 className="text-xl font-semibold w-48 text-center text-white">{reportDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h3>
+                <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{'>'}</button>
             </div>
             {renderContent()}
         </div>
@@ -786,26 +771,26 @@ const Reports = ({ participants, blocks, attendance, rentAmount, selectedDate, s
 
     return (
         <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Отчеты</h1>
+            <h1 className="text-3xl font-bold text-white mb-6">Отчеты</h1>
             <div className="flex items-center space-x-2 mb-6">
-                <h3 className="text-xl font-semibold w-full text-center">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h3>
+                <h3 className="text-xl font-semibold w-full text-center text-white">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div onClick={() => handleCardClick('totalSales')} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer">
-                    <h2 className="text-xl font-semibold text-gray-700">Общая прибыль</h2>
-                    <p className="text-4xl font-bold text-blue-600 mt-2">{totalSales.toLocaleString('ru-RU')} ₽</p>
+                <div onClick={() => handleCardClick('totalSales')} className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors cursor-pointer">
+                    <h2 className="text-xl font-semibold text-gray-300">Общая прибыль</h2>
+                    <p className="text-4xl font-bold text-orange-500 mt-2">{totalSales.toLocaleString('ru-RU')} ₽</p>
                 </div>
-                <div onClick={() => handleCardClick('netProfit')} className={`bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer`}>
-                    <h2 className="text-xl font-semibold text-gray-700">Чистая прибыль</h2>
-                    <p className={`text-4xl font-bold mt-2 ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>{netProfit.toLocaleString('ru-RU')} ₽</p>
+                <div onClick={() => handleCardClick('netProfit')} className={`bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors cursor-pointer`}>
+                    <h2 className="text-xl font-semibold text-gray-300">Чистая прибыль</h2>
+                    <p className={`text-4xl font-bold mt-2 ${netProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{netProfit.toLocaleString('ru-RU')} ₽</p>
                 </div>
-                <div onClick={() => handleCardClick('avgCost')} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer">
-                    <h2 className="text-xl font-semibold text-gray-700">Средняя стоимость тренировки</h2>
-                    <p className="text-4xl font-bold text-purple-600 mt-2">{avgTrainingCost.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</p>
+                <div onClick={() => handleCardClick('avgCost')} className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors cursor-pointer">
+                    <h2 className="text-xl font-semibold text-gray-300">Средняя стоимость тренировки</h2>
+                    <p className="text-4xl font-bold text-teal-500 mt-2">{avgTrainingCost.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</p>
                 </div>
-                <div onClick={() => handleCardClick('participantSales')} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer">
-                    <h2 className="text-xl font-semibold text-gray-700">Реализация по участникам</h2>
-                    <p className="text-gray-500 mt-2">Нажмите, чтобы посмотреть детали</p>
+                <div onClick={() => handleCardClick('participantSales')} className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors cursor-pointer">
+                    <h2 className="text-xl font-semibold text-gray-300">Реализация по участникам</h2>
+                    <p className="text-gray-400 mt-2">Нажмите, чтобы посмотреть детали</p>
                 </div>
             </div>
         </div>
@@ -887,16 +872,16 @@ const Charts = ({ participants, blocks, attendance, rentAmount, selectedDate, se
         const totalValue = isNetProfitChart ? positiveProfitTotal : positiveIncomeTotal;
 
         return (
-            <div className="bg-white p-6 rounded-lg shadow-md">
-                <button onClick={() => setView('overview')} className="flex items-center mb-6 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <button onClick={() => setView('overview')} className="flex items-center mb-6 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
                     <ArrowLeftIcon />
                     Назад к графикам
                 </button>
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">{chartTitle}</h2>
+                <h2 className="text-2xl font-semibold text-white mb-4">{chartTitle}</h2>
                 
                 <div className="overflow-x-auto">
-                    <div className="w-full h-96 p-4 pt-10 border rounded-lg flex justify-between items-center relative" style={{ minWidth: '600px' }}>
-                        <div className="absolute top-1/2 left-0 w-full h-px bg-gray-300"></div>
+                    <div className="w-full h-96 p-4 pt-10 border border-gray-700 rounded-lg flex justify-between items-center relative" style={{ minWidth: '600px' }}>
+                        <div className="absolute top-1/2 left-0 w-full h-px bg-gray-700"></div>
                         {yearlyData.map((data, index) => {
                             const value = data[dataKey];
                             const isNegative = value < 0;
@@ -907,11 +892,11 @@ const Charts = ({ participants, blocks, attendance, rentAmount, selectedDate, se
                                     <div className={`w-full h-1/2 flex flex-col ${isNegative ? 'justify-start' : 'justify-end'} items-center`}>
                                         {!isNegative && (
                                         <>
-                                            <span className="text-xs font-semibold text-gray-600 mb-1">{value.toLocaleString('ru-RU')}</span>
+                                            <span className="text-xs font-semibold text-gray-300 mb-1">{value.toLocaleString('ru-RU')}</span>
                                             <div className="w-5/6 relative transition-transform duration-200 ease-in-out group-hover:-translate-y-1" style={{ height: `${barHeight / 2}%` }}>
-                                                <div className="absolute inset-0 bg-green-400 border border-green-500"></div>
-                                                <div className="absolute top-0 left-0 w-full h-3 bg-green-500 opacity-70 transform -skew-x-[45deg] -translate-y-1.5"></div>
-                                                <div className="absolute top-0 right-0 w-3 h-full bg-green-600 opacity-70 transform -skew-y-[45deg] translate-x-1.5"></div>
+                                                <div className="absolute inset-0 bg-green-500 border border-green-600"></div>
+                                                <div className="absolute top-0 left-0 w-full h-3 bg-green-600 opacity-70 transform -skew-x-[45deg] -translate-y-1.5"></div>
+                                                <div className="absolute top-0 right-0 w-3 h-full bg-green-700 opacity-70 transform -skew-y-[45deg] translate-x-1.5"></div>
                                             </div>
                                         </>
                                         )}
@@ -920,15 +905,15 @@ const Charts = ({ participants, blocks, attendance, rentAmount, selectedDate, se
                                         {isNegative && (
                                         <>
                                             <div className="w-5/6 relative transition-transform duration-200 ease-in-out group-hover:translate-y-1" style={{ height: `${barHeight / 2}%` }}>
-                                                <div className="absolute inset-0 bg-red-400 border border-red-500"></div>
-                                                <div className="absolute bottom-0 left-0 w-full h-3 bg-red-500 opacity-70 transform -skew-x-[45deg] translate-y-1.5"></div>
-                                                <div className="absolute top-0 right-0 w-3 h-full bg-red-600 opacity-70 transform -skew-y-[45deg] translate-x-1.5"></div>
+                                                <div className="absolute inset-0 bg-red-500 border border-red-600"></div>
+                                                <div className="absolute bottom-0 left-0 w-full h-3 bg-red-600 opacity-70 transform -skew-x-[45deg] translate-y-1.5"></div>
+                                                <div className="absolute top-0 right-0 w-3 h-full bg-red-700 opacity-70 transform -skew-y-[45deg] translate-x-1.5"></div>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-600 mt-1">{value.toLocaleString('ru-RU')}</span>
+                                            <span className="text-xs font-semibold text-gray-300 mt-1">{value.toLocaleString('ru-RU')}</span>
                                         </>
                                         )}
                                     </div>
-                                    <span className="absolute -bottom-1 text-xs">{data.month.toUpperCase()}</span>
+                                    <span className="absolute -bottom-1 text-xs text-gray-400">{data.month.toUpperCase()}</span>
                                 </div>
                             )
                         })}
@@ -937,26 +922,26 @@ const Charts = ({ participants, blocks, attendance, rentAmount, selectedDate, se
 
                 <div className="mt-6 overflow-x-auto">
                     <table className="min-w-full">
-                        <thead className="bg-gray-100">
+                        <thead className="bg-gray-900">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Месяц</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{isNetProfitChart ? 'Чистая прибыль' : 'Доход (за вычетом аренды)'}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Месяц</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">{isNetProfitChart ? 'Чистая прибыль' : 'Доход (за вычетом аренды)'}</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-gray-800 divide-y divide-gray-700">
                             {yearlyData.map((data, index) => (
                                 <tr key={index}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{new Date(selectedDate.getFullYear(), index).toLocaleString('ru-RU', { month: 'long' })}</td>
-                                    <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold ${data[dataKey] >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{new Date(selectedDate.getFullYear(), index).toLocaleString('ru-RU', { month: 'long' })}</td>
+                                    <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold ${data[dataKey] >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                         {data[dataKey].toLocaleString('ru-RU')} ₽
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
-                        <tfoot className="bg-gray-50">
+                        <tfoot className="bg-gray-900">
                             <tr>
-                                <td className="px-6 py-4 text-right text-sm font-bold text-gray-700 uppercase">{totalLabel}</td>
-                                <td className="px-6 py-4 text-right text-sm font-extrabold text-green-700">
+                                <td className="px-6 py-4 text-right text-sm font-bold text-gray-300 uppercase">{totalLabel}</td>
+                                <td className="px-6 py-4 text-right text-sm font-extrabold text-green-500">
                                     {totalValue.toLocaleString('ru-RU')} ₽
                                 </td>
                             </tr>
@@ -969,20 +954,20 @@ const Charts = ({ participants, blocks, attendance, rentAmount, selectedDate, se
 
     return (
         <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Графики</h1>
+            <h1 className="text-3xl font-bold text-white mb-6">Графики</h1>
             <div className="flex items-center space-x-2 mb-6">
-                <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'<'}</button>
-                <h3 className="text-xl font-semibold w-48 text-center">{selectedDate.getFullYear()}</h3>
-                <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{'>'}</button>
+                <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{'<'}</button>
+                <h3 className="text-xl font-semibold w-48 text-center text-white">{selectedDate.getFullYear()}</h3>
+                <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{'>'}</button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div onClick={() => handleCardClick('incomeByMonth')} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer">
-                    <h2 className="text-xl font-semibold text-gray-700">Доход (оплаты) по месяцам</h2>
-                    <p className="text-gray-500 mt-2">Динамика дохода (за вычетом аренды) за год</p>
+                <div onClick={() => handleCardClick('incomeByMonth')} className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors cursor-pointer">
+                    <h2 className="text-xl font-semibold text-gray-300">Доход (оплаты) по месяцам</h2>
+                    <p className="text-gray-400 mt-2">Динамика дохода (за вычетом аренды) за год</p>
                 </div>
-                <div onClick={() => handleCardClick('netProfitByMonth')} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer">
-                    <h2 className="text-xl font-semibold text-gray-700">Чистая прибыль (реализация) по месяцам</h2>
-                    <p className="text-gray-500 mt-2">Динамика чистой прибыли за год</p>
+                <div onClick={() => handleCardClick('netProfitByMonth')} className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors cursor-pointer">
+                    <h2 className="text-xl font-semibold text-gray-300">Чистая прибыль (реализация) по месяцам</h2>
+                    <p className="text-gray-400 mt-2">Динамика чистой прибыли за год</p>
                 </div>
             </div>
         </div>
@@ -1049,7 +1034,7 @@ const AppContent = ({ user, initialData }) => {
                 setIsMenuOpen(false);
             }}
             className={`flex items-center space-x-3 px-4 py-3 rounded-lg w-full text-left transition-colors ${
-                activePage === page ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-200'
+                activePage === page ? 'bg-orange-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700 hover:text-white'
             }`}
         >
             {icon}
@@ -1058,19 +1043,19 @@ const AppContent = ({ user, initialData }) => {
     );
 
     return (
-        <div className="relative min-h-screen md:flex bg-gray-100 font-sans">
-            <div className="md:hidden flex justify-between items-center p-4 bg-white shadow-lg">
-                <div className="text-2xl font-bold text-blue-700 flex items-center space-x-2">
+        <div className="relative min-h-screen md:flex bg-gray-900 font-sans text-gray-300">
+            <div className="md:hidden flex justify-between items-center p-4 bg-gray-800 border-b border-gray-700">
+                <div className="text-2xl font-bold text-white flex items-center space-x-2">
                     <span>✅</span>
                     <span>VisitFlow</span>
                 </div>
-                <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 hover:text-gray-800">
+                <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-300 hover:text-white">
                     <MenuIcon />
                 </button>
             </div>
 
-            <aside className={`w-64 bg-white p-4 flex flex-col shadow-lg fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div className="text-2xl font-bold text-blue-700 mb-8 items-center space-x-2 hidden md:flex">
+            <aside className={`w-64 bg-gray-800 p-4 flex flex-col border-r border-gray-700 fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="text-2xl font-bold text-white mb-8 items-center space-x-2 hidden md:flex">
                     <span>✅</span>
                     <span>VisitFlow</span>
                 </div>
@@ -1085,11 +1070,11 @@ const AppContent = ({ user, initialData }) => {
                     </div>
                 </nav>
                 <div className="mt-auto">
-                    <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-100">
-                        <img className="h-10 w-10 rounded-full" src={`https://placehold.co/100x100/E2E8F0/4A5568?text=${user.email[0].toUpperCase()}`} alt="User" />
+                    <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-900">
+                        <img className="h-10 w-10 rounded-full" src={`https://placehold.co/100x100/374151/D1D5DB?text=${user.email[0].toUpperCase()}`} alt="User" />
                         <div>
-                            <p className="font-semibold text-gray-800 text-sm truncate">{user.email}</p>
-                            <button onClick={handleSignOut} className="text-sm text-blue-600 hover:underline">Выйти</button>
+                            <p className="font-semibold text-white text-sm truncate">{user.email}</p>
+                            <button onClick={handleSignOut} className="text-sm text-orange-400 hover:underline">Выйти</button>
                         </div>
                     </div>
                 </div>
@@ -1131,7 +1116,7 @@ export default function App() {
     }, []);
 
     if (loading || (user && !initialData)) {
-        return <div className="flex justify-center items-center h-screen font-bold text-xl">Загрузка...</div>;
+        return <div className="flex justify-center items-center h-screen font-bold text-xl bg-gray-900 text-white">Загрузка...</div>;
     }
 
     if (!user) {
