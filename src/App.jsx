@@ -23,7 +23,6 @@ const firebaseConfig = {
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
-// Инициализация Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -85,22 +84,8 @@ const AuthPage = () => {
                     {isLogin ? 'Вход в VisitFlow' : 'Регистрация в VisitFlow'}
                 </h2>
                 <form onSubmit={handleAuth} className="space-y-6">
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
-                        className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:bg-white"
-                        required
-                    />
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Пароль"
-                        className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:bg-white"
-                        required
-                    />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:bg-white" required />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Пароль" className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:bg-white" required />
                     <button type="submit" className="w-full px-4 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none">
                         {isLogin ? 'Войти' : 'Зарегистрироваться'}
                     </button>
@@ -142,12 +127,8 @@ const ConfirmModal = ({ show, onClose, onConfirm, title, children }) => {
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
                 <div className="text-gray-600 mb-6">{children}</div>
                 <div className="flex justify-end space-x-3">
-                    <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
-                        Отмена
-                    </button>
-                    <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                        Удалить
-                    </button>
+                    <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Отмена</button>
+                    <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Удалить</button>
                 </div>
             </div>
         </div>
@@ -168,12 +149,17 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate }) => {
     }).length;
     
     const incomeThisMonth = participants.reduce((acc, p) => {
-        const paymentDate = new Date(p.paymentDate);
-        if (paymentDate.getFullYear() === selectedYear && paymentDate.getMonth() === selectedMonth) {
-            const block = blocks.find(b => b.id === p.blockId);
-            return acc + (block ? block.cost : 0);
-        }
-        return acc;
+        const paymentsInMonth = (p.payments || []).filter(payment => {
+            const paymentDate = new Date(payment.paymentDate);
+            return paymentDate.getFullYear() === selectedYear && paymentDate.getMonth() === selectedMonth;
+        });
+        
+        const incomeFromParticipant = paymentsInMonth.reduce((sum, payment) => {
+            const block = blocks.find(b => b.id === payment.blockId);
+            return sum + (block ? block.cost : 0);
+        }, 0);
+
+        return acc + incomeFromParticipant;
     }, 0);
 
     return (
@@ -193,16 +179,14 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate }) => {
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold text-gray-700">Доход (Оплаты)</h2>
-                    <p className="text-4xl font-bold text-green-600 mt-2">
-                        {incomeThisMonth.toLocaleString('ru-RU')} ₽
-                    </p>
+                    <p className="text-4xl font-bold text-green-600 mt-2">{incomeThisMonth.toLocaleString('ru-RU')} ₽</p>
                 </div>
             </div>
         </div>
     );
 };
 
-const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance, setAttendance, selectedDate, setSelectedDate }) => {
+const AttendanceCalendar = ({ participants, blocks, attendance, setAttendance, selectedDate, setSelectedDate }) => {
     const [expandedParticipant, setExpandedParticipant] = useState(null);
     const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -234,15 +218,30 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
         });
 
         const processedData = participants.map(p => {
-            const block = blocks.find(b => b.id === p.blockId) || {};
-            const totalSessions = block.trainingCount || 0;
+            const participantPayments = p.payments || [];
+            
+            const totalSessions = participantPayments.reduce((sum, payment) => {
+                const block = blocks.find(b => b.id === payment.blockId);
+                return sum + (block ? block.trainingCount : 0);
+            }, 0);
+
             const allVisits = attendanceMap[p.id] || [];
             const totalAttendance = allVisits.length;
             const remainingSessions = totalSessions - totalAttendance;
+
             const attendedThisMonth = allVisits.filter(att => 
                 att.year === selectedDate.getFullYear() && att.month === selectedDate.getMonth()
             ).length;
-            return { ...p, blockName: block.name || "Блок не назначен", attendedThisMonth, remainingSessions };
+            
+            const lastPayment = participantPayments.length > 0 ? participantPayments[participantPayments.length - 1] : null;
+            const lastBlock = lastPayment ? blocks.find(b => b.id === lastPayment.blockId) : null;
+
+            return { 
+                ...p, 
+                blockName: lastBlock ? lastBlock.name : "Блок не назначен", 
+                attendedThisMonth, 
+                remainingSessions 
+            };
         });
         setParticipantsData(processedData);
     }, [selectedDate, participants, blocks, attendance]);
@@ -273,6 +272,7 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
             <div className="space-y-4">
                 {participantsData.map(p => {
                     const isExpanded = expandedParticipant === p.id;
+                    const participantPayments = p.payments || [];
                     return (
                         <div key={p.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <div 
@@ -302,11 +302,12 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
                                         {daysArray.map(day => {
                                             const key = `${p.id}-${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${day}`;
                                             const isChecked = !!attendance[key];
-                                            const paymentDateObj = p.paymentDate ? new Date(p.paymentDate) : null;
-                                            const isPaymentDay = paymentDateObj &&
-                                                                 paymentDateObj.getFullYear() === selectedDate.getFullYear() &&
-                                                                 paymentDateObj.getMonth() === selectedDate.getMonth() &&
-                                                                 paymentDateObj.getDate() === day;
+                                            const isPaymentDay = participantPayments.some(payment => {
+                                                const paymentDateObj = new Date(payment.paymentDate);
+                                                return paymentDateObj.getFullYear() === selectedDate.getFullYear() &&
+                                                       paymentDateObj.getMonth() === selectedDate.getMonth() &&
+                                                       paymentDateObj.getDate() === day;
+                                            });
                                             return (
                                                 <div 
                                                     key={day} 
@@ -330,49 +331,56 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
 };
 
 const Participants = ({ participants, setParticipants, blocks, attendance, setAttendance }) => {
-    const [showModal, setShowModal] = useState(false);
-    const [editingParticipant, setEditingParticipant] = useState(null);
+    const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
+    const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
+    const [participantToEdit, setParticipantToEdit] = useState(null);
     const [participantToDelete, setParticipantToDelete] = useState(null);
-    const [formData, setFormData] = useState({ name: '', blockId: '', paymentDate: '' });
+    
+    const [newParticipantData, setNewParticipantData] = useState({ name: '' });
+    const [newPaymentData, setNewPaymentData] = useState({ blockId: '', paymentDate: '' });
 
-    const handleOpenModal = (participant = null) => {
-        setEditingParticipant(participant);
+    const handleOpenAddModal = () => {
+        setNewParticipantData({ name: '' });
+        setShowAddParticipantModal(true);
+    };
+
+    const handleOpenPaymentModal = (participant) => {
+        setParticipantToEdit(participant);
         const today = new Date().toISOString().split('T')[0];
-        setFormData(participant ? { ...participant } : { name: '', blockId: blocks[0]?.id || '', paymentDate: today });
-        setShowModal(true);
+        setNewPaymentData({ blockId: blocks[0]?.id || '', paymentDate: today });
+        setShowAddPaymentModal(true);
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setEditingParticipant(null);
+    const handleCloseModals = () => {
+        setShowAddParticipantModal(false);
+        setShowAddPaymentModal(false);
+        setParticipantToEdit(null);
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        const newFormData = { ...formData, [name]: value };
-        if (name === 'blockId' && parseInt(value, 10) === 0) {
-            newFormData.paymentDate = '';
-        }
-        setFormData(newFormData);
-    };
-
-    const handleSubmit = (e) => {
+    const handleAddParticipant = (e) => {
         e.preventDefault();
-        const finalData = {
-            ...formData,
-            blockId: parseInt(formData.blockId)
-        };
-        if (editingParticipant) {
-            setParticipants(participants.map(p => p.id === editingParticipant.id ? { ...p, ...finalData } : p));
-        } else {
-            setParticipants([...participants, { ...finalData, id: Date.now() }]);
-        }
-        handleCloseModal();
+        setParticipants(prev => [...prev, { ...newParticipantData, id: Date.now(), payments: [] }]);
+        handleCloseModals();
+    };
+
+    const handleAddPayment = (e) => {
+        e.preventDefault();
+        setParticipants(prev => prev.map(p => {
+            if (p.id === participantToEdit.id) {
+                const newPayment = {
+                    ...newPaymentData,
+                    blockId: parseInt(newPaymentData.blockId),
+                    paymentId: Date.now()
+                };
+                const existingPayments = p.payments || [];
+                return { ...p, payments: [...existingPayments, newPayment] };
+            }
+            return p;
+        }));
+        handleCloseModals();
     };
     
-    const handleDelete = (id) => {
-        setParticipantToDelete(id);
-    };
+    const handleDelete = (id) => setParticipantToDelete(id);
 
     const confirmDelete = () => {
         if (!participantToDelete) return;
@@ -393,39 +401,53 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
         <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">Управление участниками</h1>
             <div className="flex justify-end items-center mb-6">
-                <button onClick={() => handleOpenModal()} className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Добавить участника</button>
+                <button onClick={handleOpenAddModal} className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Добавить участника</button>
             </div>
             <div className="bg-white rounded-lg shadow-md overflow-x-auto">
                 <table className="min-w-full">
                     <thead className="bg-gray-100">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ФИО</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата оплаты</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Блок</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата последней оплаты</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Последний блок</th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {participants.map(p => (
-                            <tr key={p.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('ru-RU') : '---'}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{blocks.find(b => b.id === p.blockId)?.name || 'N/A'}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button onClick={() => handleOpenModal(p)} className="text-indigo-600 hover:text-indigo-900 mr-4"><EditIcon /></button>
-                                    <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:text-red-900"><DeleteIcon /></button>
-                                </td>
-                            </tr>
-                        ))}
+                        {participants.map(p => {
+                            const lastPayment = p.payments && p.payments.length > 0 ? p.payments[p.payments.length - 1] : null;
+                            const lastBlock = lastPayment ? blocks.find(b => b.id === lastPayment.blockId) : null;
+                            return (
+                                <tr key={p.id}>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {lastPayment ? new Date(lastPayment.paymentDate).toLocaleDateString('ru-RU') : '---'}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lastBlock ? lastBlock.name : 'N/A'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button onClick={() => handleOpenPaymentModal(p)} className="text-indigo-600 hover:text-indigo-900 mr-4"><EditIcon /></button>
+                                        <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:text-red-900"><DeleteIcon /></button>
+                                    </td>
+                                </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
             </div>
-            <Modal show={showModal} onClose={handleCloseModal} title={editingParticipant ? "Редактировать участника" : "Добавить участника"}>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="ФИО" className="w-full p-2 border rounded-lg" required />
-                    <select name="blockId" value={formData.blockId || ''} onChange={handleChange} className="w-full p-2 border rounded-lg bg-white" required>
+
+            <Modal show={showAddParticipantModal} onClose={handleCloseModals} title="Добавить участника">
+                <form onSubmit={handleAddParticipant} className="space-y-4">
+                    <input type="text" name="name" value={newParticipantData.name} onChange={(e) => setNewParticipantData({name: e.target.value})} placeholder="ФИО" className="w-full p-2 border rounded-lg" required />
+                    <div className="flex justify-end space-x-3">
+                        <button type="button" onClick={handleCloseModals} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Добавить</button>
+                    </div>
+                </form>
+            </Modal>
+            
+            <Modal show={showAddPaymentModal} onClose={handleCloseModals} title={`Добавить оплату для: ${participantToEdit?.name}`}>
+                <form onSubmit={handleAddPayment} className="space-y-4">
+                    <select name="blockId" value={newPaymentData.blockId} onChange={(e) => setNewPaymentData({...newPaymentData, blockId: e.target.value})} className="w-full p-2 border rounded-lg bg-white" required>
                         <option value="" disabled>Выберите блок</option>
                         {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                     </select>
@@ -435,25 +457,20 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
                              type="date"
                              id="paymentDate"
                              name="paymentDate"
-                             value={formData.paymentDate}
-                             onChange={handleChange}
+                             value={newPaymentData.paymentDate}
+                             onChange={(e) => setNewPaymentData({...newPaymentData, paymentDate: e.target.value})}
                              className="w-full p-2 border rounded-lg"
-                             disabled={parseInt(formData.blockId, 10) === 0}
-                             required={parseInt(formData.blockId, 10) !== 0}
+                             required
                          />
                     </div>
                     <div className="flex justify-end space-x-3">
-                        <button type="button" onClick={handleCloseModal} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">{editingParticipant ? "Сохранить" : "Добавить"}</button>
+                        <button type="button" onClick={handleCloseModals} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Добавить оплату</button>
                     </div>
                 </form>
             </Modal>
-            <ConfirmModal
-                show={participantToDelete !== null}
-                onClose={() => setParticipantToDelete(null)}
-                onConfirm={confirmDelete}
-                title="Подтвердите удаление"
-            >
+
+            <ConfirmModal show={participantToDelete !== null} onClose={() => setParticipantToDelete(null)} onConfirm={confirmDelete} title="Подтвердите удаление">
                 Вы уверены, что хотите удалить этого участника?
             </ConfirmModal>
         </div>
@@ -506,7 +523,10 @@ const Blocks = ({ blocks, setBlocks, participants, setParticipants, rentAmount, 
     const confirmDelete = () => {
         if (!blockToDelete) return;
         setParticipants(prevParticipants =>
-            prevParticipants.map(p => (p.blockId === blockToDelete ? { ...p, blockId: null } : p))
+            prevParticipants.map(p => {
+                const newPayments = (p.payments || []).filter(pay => pay.blockId !== blockToDelete);
+                return { ...p, payments: newPayments };
+            })
         );
         setBlocks(prevBlocks => prevBlocks.filter(b => b.id !== blockToDelete));
         setBlockToDelete(null);
@@ -707,30 +727,41 @@ const Reports = ({ participants, blocks, attendance, rentAmount, selectedDate, s
     };
 
     const reportData = participants.map(p => {
-        const block = blocks.find(b => b.id === p.blockId);
-        if (!block) return { salesThisMonth: 0, id: p.id }; 
+        const participantPayments = p.payments || [];
+        
+        let totalCostPaid = 0;
+        let totalSessionsPurchased = 0;
+        participantPayments.forEach(payment => {
+            const block = blocks.find(b => b.id === payment.blockId);
+            if (block) {
+                totalCostPaid += block.cost;
+                totalSessionsPurchased += block.trainingCount;
+            }
+        });
 
-        const costPerTraining = (block.cost && block.trainingCount) ? (block.cost / block.trainingCount) : 0;
+        const costPerTraining = totalSessionsPurchased > 0 ? totalCostPaid / totalSessionsPurchased : 0;
         
         const attendedThisMonth = Object.keys(attendance).filter(key => {
             const parts = key.split('-');
             return parts.length === 4 &&
-                parseInt(parts[0], 10) === p.id &&
+                parts[0] === String(p.id) &&
                 attendance[key] === true &&
                 parseInt(parts[1], 10) === reportYear &&
                 parseInt(parts[2], 10) === reportMonth;
         }).length;
 
         const salesThisMonth = costPerTraining * attendedThisMonth;
+        const lastPayment = participantPayments.length > 0 ? participantPayments[participantPayments.length - 1] : null;
+        const lastBlock = lastPayment ? blocks.find(b => b.id === lastPayment.blockId) : null;
 
         return {
             ...p,
-            blockName: block.name,
+            blockName: lastBlock ? lastBlock.name : 'N/A',
             costPerTraining,
             attendedThisMonth,
             salesThisMonth
         };
-    }).filter(p => p.id); 
+    });
 
     const totalSales = reportData.reduce((sum, p) => sum + p.salesThisMonth, 0);
     const netProfit = totalSales - rentAmount;
@@ -802,23 +833,34 @@ const Charts = ({ participants, blocks, attendance, rentAmount, selectedDate, se
         const year = selectedDate.getFullYear();
         return Array.from({ length: 12 }, (_, month) => {
             const salesForMonth = participants.reduce((totalSales, p) => {
-                const block = blocks.find(b => b.id === p.blockId);
-                if (!block || !block.cost || !block.trainingCount) return totalSales;
-                const costPerTraining = block.cost / block.trainingCount;
+                const participantPayments = p.payments || [];
+                let totalCostPaid = 0;
+                let totalSessionsPurchased = 0;
+                participantPayments.forEach(payment => {
+                    const block = blocks.find(b => b.id === payment.blockId);
+                    if (block) {
+                        totalCostPaid += block.cost;
+                        totalSessionsPurchased += block.trainingCount;
+                    }
+                });
+                const costPerTraining = totalSessionsPurchased > 0 ? totalCostPaid / totalSessionsPurchased : 0;
+
                 const attended = Object.keys(attendance).filter(key => {
                     const parts = key.split('-');
-                    return parts.length === 4 && parseInt(parts[0], 10) === p.id && attendance[key] && parseInt(parts[1], 10) === year && parseInt(parts[2], 10) === month;
+                    return parts.length === 4 && parts[0] === String(p.id) && attendance[key] && parseInt(parts[1], 10) === year && parseInt(parts[2], 10) === month;
                 }).length;
                 return totalSales + (attended * costPerTraining);
             }, 0);
             
             const incomeForMonth = participants.reduce((total, p) => {
-                const paymentDate = new Date(p.paymentDate);
-                if (paymentDate.getFullYear() === year && paymentDate.getMonth() === month) {
-                    const block = blocks.find(b => b.id === p.blockId);
-                    return total + (block ? block.cost : 0);
-                }
-                return total;
+                const paymentsInMonth = (p.payments || []).filter(payment => {
+                    const paymentDate = new Date(payment.paymentDate);
+                    return paymentDate.getFullYear() === year && paymentDate.getMonth() === month;
+                });
+                return total + paymentsInMonth.reduce((sum, payment) => {
+                    const block = blocks.find(b => b.id === payment.blockId);
+                    return sum + (block ? block.cost : 0);
+                }, 0);
             }, 0);
 
             return {
