@@ -161,7 +161,7 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
         }, 0);
 
         return acc + incomeFromParticipant;
-    }, 0) - rentAmount;
+    }, 0) - (rentAmount || 50000);
 
     return (
         <div>
@@ -984,7 +984,7 @@ const AppContent = ({ user, initialData }) => {
     const [blocks, setBlocks] = useState(initialData.blocks || []);
     const [participants, setParticipants] = useState(initialData.participants || []);
     const [attendance, setAttendance] = useState(initialData.attendance || {});
-    const [rentAmount, setRentAmount] = useState(initialData.rentAmount || 0);
+    const [rentAmount, setRentAmount] = useState(initialData?.rentAmount || 50000);
     
     useEffect(() => {
         const saveData = async () => {
