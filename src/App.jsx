@@ -149,8 +149,8 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
         return attendance[key] === true && year === selectedYear && month === selectedMonth;
     }).length;
     
-    // Убеждаемся, что rentAmount имеет значение по умолчанию
-    const currentRentAmount = rentAmount && rentAmount > 0 ? rentAmount : 50000;
+    // ПРИНУДИТЕЛЬНО устанавливаем расходы в 50000
+    const currentRentAmount = 50000;
     
     // Отладочная информация
     console.log('Dashboard rentAmount:', rentAmount, 'currentRentAmount:', currentRentAmount);
