@@ -152,6 +152,9 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
     // Убеждаемся, что rentAmount имеет значение по умолчанию
     const currentRentAmount = rentAmount && rentAmount > 0 ? rentAmount : 50000;
     
+    // Отладочная информация
+    console.log('Dashboard rentAmount:', rentAmount, 'currentRentAmount:', currentRentAmount);
+    
     const incomeThisMonth = participants.reduce((acc, p) => {
         const paymentsInMonth = (p.payments || []).filter(payment => {
             const paymentDate = new Date(payment.paymentDate);
@@ -988,6 +991,13 @@ const AppContent = ({ user, initialData }) => {
     const [participants, setParticipants] = useState(initialData.participants || []);
     const [attendance, setAttendance] = useState(initialData.attendance || {});
     const [rentAmount, setRentAmount] = useState(initialData?.rentAmount || 50000);
+    
+    // Принудительно устанавливаем значение по умолчанию если rentAmount равен 0
+    useEffect(() => {
+        if (rentAmount === 0 || !rentAmount) {
+            setRentAmount(50000);
+        }
+    }, [rentAmount]);
     
     useEffect(() => {
         const saveData = async () => {
