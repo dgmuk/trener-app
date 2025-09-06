@@ -149,6 +149,9 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
         return attendance[key] === true && year === selectedYear && month === selectedMonth;
     }).length;
     
+    // Убеждаемся, что rentAmount имеет значение по умолчанию
+    const currentRentAmount = rentAmount && rentAmount > 0 ? rentAmount : 50000;
+    
     const incomeThisMonth = participants.reduce((acc, p) => {
         const paymentsInMonth = (p.payments || []).filter(payment => {
             const paymentDate = new Date(payment.paymentDate);
@@ -161,7 +164,7 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
         }, 0);
 
         return acc + incomeFromParticipant;
-    }, 0) - (rentAmount || 50000);
+    }, 0) - currentRentAmount;
 
     return (
         <div>
