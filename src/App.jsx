@@ -150,7 +150,7 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
     }).length;
     
     // Используем реальное значение rentAmount или 50000 по умолчанию
-    const currentRentAmount = rentAmount && rentAmount > 0 ? rentAmount : 50000;
+    const currentRentAmount = (typeof rentAmount === 'number' && rentAmount > 0) ? rentAmount : 50000;
     
     // Отладочная информация
     console.log('Dashboard rentAmount:', rentAmount, 'currentRentAmount:', currentRentAmount);
@@ -761,7 +761,8 @@ const Reports = ({ participants, blocks, attendance, rentAmount, selectedDate, s
     });
 
     const totalSales = reportData.reduce((sum, p) => sum + p.salesThisMonth, 0);
-    const netProfit = totalSales - rentAmount;
+    const currentRentAmount = (typeof rentAmount === 'number' && rentAmount > 0) ? rentAmount : 50000;
+    const netProfit = totalSales - currentRentAmount;
     const totalTrainings = reportData.reduce((sum, p) => sum + p.attendedThisMonth, 0);
     const avgTrainingCost = totalTrainings > 0 ? totalSales / totalTrainings : 0;
 
@@ -773,7 +774,7 @@ const Reports = ({ participants, blocks, attendance, rentAmount, selectedDate, s
                     reportData={reportData}
                     totalSales={totalSales}
                     netProfit={netProfit}
-                    rentAmount={rentAmount}
+                    rentAmount={currentRentAmount}
                     totalTrainings={totalTrainings}
                     avgTrainingCost={avgTrainingCost}
                     reportDate={selectedDate}
@@ -860,10 +861,11 @@ const Charts = ({ participants, blocks, attendance, rentAmount, selectedDate, se
                 }, 0);
             }, 0);
 
+            const currentRentAmount = (typeof rentAmount === 'number' && rentAmount > 0) ? rentAmount : 50000;
             return {
                 month: new Date(year, month).toLocaleString('ru-RU', { month: 'short' }),
-                income: incomeForMonth - rentAmount,
-                netProfit: salesForMonth - rentAmount,
+                income: incomeForMonth - currentRentAmount,
+                netProfit: salesForMonth - currentRentAmount,
             };
         });
     };
@@ -995,11 +997,14 @@ const AppContent = ({ user, initialData }) => {
     const [blocks, setBlocks] = useState(initialData.blocks || []);
     const [participants, setParticipants] = useState(initialData.participants || []);
     const [attendance, setAttendance] = useState(initialData.attendance || {});
-    const [rentAmount, setRentAmount] = useState(initialData?.rentAmount || 50000);
+    const [rentAmount, setRentAmount] = useState(() => {
+        const initialRent = initialData?.rentAmount;
+        return (typeof initialRent === 'number' && initialRent > 0) ? initialRent : 50000;
+    });
     
-    // Принудительно устанавливаем значение по умолчанию если rentAmount равен 0
+    // Принудительно устанавливаем значение по умолчанию если rentAmount некорректный
     useEffect(() => {
-        if (rentAmount === 0 || !rentAmount) {
+        if (typeof rentAmount !== 'number' || rentAmount <= 0) {
             setRentAmount(50000);
         }
     }, [rentAmount]);
