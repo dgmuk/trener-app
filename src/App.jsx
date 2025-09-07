@@ -152,9 +152,6 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
     // Используем реальное значение rentAmount или 50000 по умолчанию
     const currentRentAmount = (typeof rentAmount === 'number' && rentAmount > 0) ? rentAmount : 50000;
     
-    // Отладочная информация
-    console.log('Dashboard rentAmount:', rentAmount, 'currentRentAmount:', currentRentAmount);
-    
     const paymentsIncome = participants.reduce((acc, p) => {
         const paymentsInMonth = (p.payments || []).filter(payment => {
             const paymentDate = new Date(payment.paymentDate);
@@ -170,8 +167,6 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
     }, 0);
     
     const incomeThisMonth = paymentsIncome - currentRentAmount;
-    
-    console.log('Расчет дохода:', { paymentsIncome, currentRentAmount, incomeThisMonth });
 
     return (
         <div>
@@ -191,7 +186,6 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
                 <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors">
                     <h2 className="text-xl font-semibold text-gray-300">Доход (Оплаты)</h2>
                     <p className={`text-4xl font-bold mt-2 ${incomeThisMonth >= 0 ? 'text-green-500' : 'text-red-500'}`}>{incomeThisMonth.toLocaleString('ru-RU')} ₽</p>
-                    <p className="text-xs text-gray-400 mt-2">Отладка: rentAmount={rentAmount}, currentRentAmount={currentRentAmount}</p>
                 </div>
             </div>
         </div>
