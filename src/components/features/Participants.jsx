@@ -68,19 +68,17 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
 
                     // Handle Online/Time-based blocks
                     if (block && block.type === 'time') {
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
+                        // ROBUST PARSING: Parse YYYY-MM-DD string directly to avoid timezone issues or fallbacks
+                        const dateStr = newPaymentData.paymentDate || new Date().toISOString().split('T')[0];
+                        const [year, month, day] = dateStr.split('-').map(num => parseInt(num, 10));
 
-                        let currentExpiry = p.activeUntil ? new Date(p.activeUntil) : null;
-                        if (currentExpiry && currentExpiry < today) {
-                            currentExpiry = null; // Expired, start from today
-                        }
+                        // Create date at 00:00:00 local time
+                        const paymentDate = new Date(year, month - 1, day);
 
-                        const startDate = currentExpiry || today;
-                        const newExpiry = new Date(startDate);
+                        // Always calculate from the payment date as requested
+                        const newExpiry = new Date(paymentDate);
                         newExpiry.setDate(newExpiry.getDate() + (parseInt(block.duration) || 0));
 
-                        updatedParticipant.activeUntil = newExpiry.toISOString().split('T')[0];
                         updatedParticipant.subscriptionType = 'time';
                     }
                 }
