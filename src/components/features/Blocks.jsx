@@ -30,7 +30,9 @@ const Blocks = ({ blocks, setBlocks, participants, setParticipants, rentAmount, 
         const finalData = {
             ...formData,
             cost: parseFloat(formData.cost),
-            trainingCount: parseInt(formData.trainingCount, 10)
+            trainingCount: formData.type === 'time' ? 0 : parseInt(formData.trainingCount, 10),
+            duration: formData.type === 'time' ? parseInt(formData.duration, 10) : 0,
+            type: formData.type || 'count'
         };
 
         if (editingBlock) {
@@ -80,7 +82,11 @@ const Blocks = ({ blocks, setBlocks, participants, setParticipants, rentAmount, 
                     <div key={block.id} className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-teal-500 transition-colors relative group">
                         <h3 className="text-xl font-bold text-white mb-2">{block.name}</h3>
                         <p className="text-gray-300">Стоимость: <span className="font-semibold text-orange-400">{block.cost} ₽</span></p>
-                        <p className="text-gray-300">Количество тренировок: <span className="font-semibold text-teal-400">{block.trainingCount}</span></p>
+                        {block.type === 'time' ? (
+                            <p className="text-gray-300">Длительность: <span className="font-semibold text-blue-400">{block.duration} дн.</span></p>
+                        ) : (
+                            <p className="text-gray-300">Количество тренировок: <span className="font-semibold text-teal-400">{block.trainingCount}</span></p>
+                        )}
                         <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => handleOpenModal(block)} className="text-gray-400 hover:text-white"><EditIcon /></button>
                             <button onClick={() => handleDelete(block)} className="text-red-400 hover:text-red-500"><DeleteIcon /></button>
@@ -93,7 +99,38 @@ const Blocks = ({ blocks, setBlocks, participants, setParticipants, rentAmount, 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Название блока" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
                     <input type="number" name="cost" value={formData.cost} onChange={handleChange} placeholder="Стоимость" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
-                    <input type="number" name="trainingCount" value={formData.trainingCount} onChange={handleChange} placeholder="Количество тренировок" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
+
+                    <div className="flex space-x-4 mb-2">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="type"
+                                value="count"
+                                checked={!formData.type || formData.type === 'count'}
+                                onChange={handleChange}
+                                className="text-orange-500 focus:ring-orange-500"
+                            />
+                            <span className="text-gray-300">Тренировки</span>
+                        </label>
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="type"
+                                value="time"
+                                checked={formData.type === 'time'}
+                                onChange={handleChange}
+                                className="text-orange-500 focus:ring-orange-500"
+                            />
+                            <span className="text-gray-300">Длительность</span>
+                        </label>
+                    </div>
+
+                    {formData.type === 'time' ? (
+                        <input type="number" name="duration" value={formData.duration || ''} onChange={handleChange} placeholder="Длительность (дней)" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
+                    ) : (
+                        <input type="number" name="trainingCount" value={formData.trainingCount || ''} onChange={handleChange} placeholder="Количество тренировок" className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500" required />
+                    )}
+
                     <div className="flex justify-end space-x-3">
                         <button type="button" onClick={handleCloseModal} className="px-4 py-2 bg-gray-700 rounded-lg">Отмена</button>
                         <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Сохранить</button>

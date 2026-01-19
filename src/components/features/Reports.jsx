@@ -58,8 +58,9 @@ const ReportDetails = ({ type, participants, blocks, attendance, rentAmount, onB
                     {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
                 </select>
                 <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-gray-700 text-white rounded-lg border border-gray-600">
-                    <option value={2024}>2024</option>
-                    <option value={2025}>2025</option>
+                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
+                        <option key={year} value={year}>{year}</option>
+                    ))}
                 </select>
             </div>
 

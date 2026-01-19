@@ -1,21 +1,50 @@
 import React, { useState } from 'react';
 import Modal from '../ui/Modal';
+import ConfirmModal from '../ui/ConfirmModal';
 import { DeleteIcon, EditIcon } from '../ui/Icons';
 
 const PaymentHistoryModal = ({ show, onClose, participant, onUpdateParticipant }) => {
     const [editingPaymentId, setEditingPaymentId] = useState(null);
     const [editData, setEditData] = useState({});
+    const [paymentToDelete, setPaymentToDelete] = useState(null);
 
     if (!participant) return null;
 
     const payments = participant.payments || [];
     const sortedPayments = [...payments].sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
 
-    const handleDelete = (paymentId) => {
-        if (window.confirm('Вы уверены, что хотите удалить эту оплату? Это изменит статистику.')) {
-            const updatedPayments = payments.filter(p => p.paymentId !== paymentId);
-            onUpdateParticipant({ ...participant, payments: updatedPayments });
+    const handleDeleteClick = (payment) => {
+        setPaymentToDelete(payment);
+    };
+
+    const confirmDelete = () => {
+        if (!paymentToDelete) return;
+
+        const payment = paymentToDelete;
+        let updatedPayments;
+
+        // 1. Try to find by object reference (most precise, handles duplicates)
+        const index = payments.indexOf(payment);
+        if (index > -1) {
+            updatedPayments = [...payments];
+            updatedPayments.splice(index, 1);
         }
+        // 2. Fallback to ID if reference missing (e.g. if objects reconstructed)
+        // Explicitly check for null/undefined to allow ID 0
+        else if (payment.paymentId !== undefined && payment.paymentId !== null) {
+            updatedPayments = payments.filter(p => p.paymentId != payment.paymentId);
+        }
+        // 3. Fallback for absolutely broken data (no ID, no reference) - try content match
+        else {
+            updatedPayments = payments.filter(p =>
+                p.paymentDate !== payment.paymentDate ||
+                p.costSnapshot != payment.costSnapshot
+            );
+        }
+
+        // Safety check: if nothing changed, maybe logic failed, but usually we just return updated array
+        onUpdateParticipant({ ...participant, payments: updatedPayments || payments });
+        setPaymentToDelete(null);
     };
 
     const startEdit = (payment) => {
@@ -121,7 +150,7 @@ const PaymentHistoryModal = ({ show, onClose, participant, onUpdateParticipant }
                                                     <button onClick={() => startEdit(payment)} className="text-blue-400 hover:text-blue-500 mr-3" title="Редактировать">
                                                         <EditIcon />
                                                     </button>
-                                                    <button onClick={() => handleDelete(payment.paymentId)} className="text-red-400 hover:text-red-500" title="Удалить">
+                                                    <button onClick={() => handleDeleteClick(payment)} className="text-red-400 hover:text-red-500" title="Удалить">
                                                         <DeleteIcon />
                                                     </button>
                                                 </td>
@@ -137,6 +166,17 @@ const PaymentHistoryModal = ({ show, onClose, participant, onUpdateParticipant }
             <div className="mt-6 flex justify-end">
                 <button onClick={onClose} className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">Закрыть</button>
             </div>
+
+            <ConfirmModal
+                show={!!paymentToDelete}
+                onClose={() => setPaymentToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Удалить оплату?"
+            >
+                <p>Вы уверены, что хотите удалить эту оплату? Это изменит статистику.</p>
+                <p className="text-sm text-gray-400 mt-2">Дата: {paymentToDelete && new Date(paymentToDelete.paymentDate).toLocaleDateString('ru-RU')}</p>
+                <p className="text-sm text-gray-400">Сумма: {paymentToDelete && paymentToDelete.costSnapshot} ₽</p>
+            </ConfirmModal>
         </Modal>
     );
 };

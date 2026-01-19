@@ -240,7 +240,15 @@ const AppContent = ({ user, initialData }) => {
                         <span className="font-medium">Резервная копия</span>
                     </button>
                     <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-900">
-                        <img className="h-10 w-10 rounded-full object-cover" src={user.photoURL || `https://placehold.co/100x100/374151/D1D5DB?text=${user.email[0].toUpperCase()}`} alt="User" />
+                        <img
+                            className="h-10 w-10 rounded-full object-cover"
+                            src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=orange&color=fff`}
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = `https://ui-avatars.com/api/?name=${user.email}&background=orange&color=fff`;
+                            }}
+                            alt="User"
+                        />
                         <div>
                             <p className="font-semibold text-white text-sm truncate">{user.email}</p>
                             <button onClick={handleSignOut} className="text-sm text-orange-400 hover:underline">Выйти</button>

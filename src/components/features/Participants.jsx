@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Modal from '../ui/Modal';
 import ConfirmModal from '../ui/ConfirmModal';
-import { EditIcon, ArchiveIcon, RestoreIcon, DeleteIcon, HistoryIcon } from '../ui/Icons';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { EditIcon, ArchiveIcon, RestoreIcon, DeleteIcon, HistoryIcon, GripVerticalIcon } from '../ui/Icons';
 import PaymentHistoryModal from './PaymentHistoryModal';
 
 const Participants = ({ participants, setParticipants, blocks, attendance, setAttendance, addNotification }) => {
@@ -27,7 +28,7 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
         setParticipantToEdit(participant);
         setEditingName(participant.name);
         const today = new Date().toISOString().split('T')[0];
-        setNewPaymentData({ blockId: '', paymentDate: today });
+        setNewPaymentData({ blockId: '', paymentDate: today, isCustom: false, customAmount: '', customCount: '' });
         setShowAddPaymentModal(true);
     };
 
@@ -43,19 +44,45 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
             if (p.id === participantToEdit.id) {
                 let updatedParticipant = { ...p, name: editingName };
 
-                if (newPaymentData.blockId) {
+                if (newPaymentData.isCustom && newPaymentData.customAmount && newPaymentData.customCount) {
+                    const newPayment = {
+                        ...newPaymentData,
+                        blockId: 'custom',
+                        paymentId: Date.now(),
+                        costSnapshot: parseFloat(newPaymentData.customAmount),
+                        trainingCountSnapshot: parseInt(newPaymentData.customCount),
+                        blockNameSnapshot: 'Произвольная оплата'
+                    };
+                    updatedParticipant.payments = [...(p.payments || []), newPayment];
+                } else if (newPaymentData.blockId) {
                     const block = blocks.find(b => b.id === parseInt(newPaymentData.blockId));
                     const newPayment = {
                         ...newPaymentData,
                         blockId: parseInt(newPaymentData.blockId),
                         paymentId: Date.now(),
-                        // Snapshotting data
                         costSnapshot: block ? block.cost : 0,
                         trainingCountSnapshot: block ? block.trainingCount : 0,
                         blockNameSnapshot: block ? block.name : 'Unknown Block'
                     };
-                    const existingPayments = p.payments || [];
-                    updatedParticipant.payments = [...existingPayments, newPayment];
+                    updatedParticipant.payments = [...(p.payments || []), newPayment];
+
+                    // Handle Online/Time-based blocks
+                    if (block && block.type === 'time') {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+
+                        let currentExpiry = p.activeUntil ? new Date(p.activeUntil) : null;
+                        if (currentExpiry && currentExpiry < today) {
+                            currentExpiry = null; // Expired, start from today
+                        }
+
+                        const startDate = currentExpiry || today;
+                        const newExpiry = new Date(startDate);
+                        newExpiry.setDate(newExpiry.getDate() + (parseInt(block.duration) || 0));
+
+                        updatedParticipant.activeUntil = newExpiry.toISOString().split('T')[0];
+                        updatedParticipant.subscriptionType = 'time';
+                    }
                 }
                 return updatedParticipant;
             }
@@ -97,7 +124,16 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
         }
     };
 
+    const handleOnDragEnd = (result) => {
+        if (!result.destination) return;
+        if (searchQuery || activeTab !== 'active') return; // Disable drop if filtered
 
+        const items = Array.from(participants);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        setParticipants(items);
+    };
 
     const safeParticipants = Array.isArray(participants) ? participants : [];
     const safeBlocks = Array.isArray(blocks) ? blocks : [];
@@ -110,6 +146,8 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
             return true;
         })
         .filter(p => (p.name || '').toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const isDraggable = activeTab === 'active' && !searchQuery;
 
     return (
         <div>
@@ -145,50 +183,85 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
             </div>
 
             <div className="bg-gray-800 rounded-lg shadow-lg overflow-x-auto border border-gray-700">
-                <table className="min-w-full">
-                    <thead className="bg-gray-900">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ФИО</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Дата последней оплаты</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Последний блок</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                        {filteredParticipants.map(p => {
-                            const lastPayment = (p.payments && Array.isArray(p.payments) && p.payments.length > 0) ? p.payments[p.payments.length - 1] : null;
-                            const lastBlock = lastPayment ? safeBlocks.find(b => b.id === lastPayment.blockId) : null;
-                            const displayBlockName = lastPayment?.blockNameSnapshot || lastBlock?.name || 'N/A';
-                            return (
-                                <tr key={p.id} className="hover:bg-gray-700">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{p.name}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                        {lastPayment ? new Date(lastPayment.paymentDate).toLocaleDateString('ru-RU') : '---'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{displayBlockName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onClick={() => handleOpenHistory(p)} className="text-blue-400 hover:text-blue-500 mr-4" title="История оплат"><HistoryIcon /></button>
-                                        <button onClick={() => handleOpenPaymentModal(p)} className="text-orange-400 hover:text-orange-500 mr-4"><EditIcon /></button>
-                                        {activeTab === 'active' ? (
-                                            <button onClick={() => toggleArchiveStatus(p.id, true)} className="text-red-400 hover:text-red-500" title="Архивировать">
-                                                <ArchiveIcon />
-                                            </button>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => toggleArchiveStatus(p.id, false)} className="text-green-400 hover:text-green-500 mr-4" title="Восстановить">
-                                                    <RestoreIcon />
-                                                </button>
-                                                <button onClick={() => setParticipantToDelete(p)} className="text-red-400 hover:text-red-500" title="Удалить навсегда">
-                                                    <DeleteIcon />
-                                                </button>
-                                            </>
-                                        )}
-                                    </td>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>
+                <DragDropContext onDragEnd={handleOnDragEnd}>
+                    <table className="min-w-full">
+                        <thead className="bg-gray-900">
+                            <tr>
+                                {isDraggable && <th className="px-2 py-3 w-8"></th>} {/* Drag Handle Column */}
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ФИО</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Дата последней оплаты</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Последний блок</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Действия</th>
+                            </tr>
+                        </thead>
+                        <Droppable droppableId="participants-list" isDropDisabled={!isDraggable}>
+                            {(provided) => (
+                                <tbody
+                                    className="divide-y divide-gray-700"
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                >
+                                    {filteredParticipants.map((p, index) => {
+                                        const lastPayment = (p.payments && Array.isArray(p.payments) && p.payments.length > 0) ? p.payments[p.payments.length - 1] : null;
+                                        const lastBlock = lastPayment ? safeBlocks.find(b => b.id === lastPayment.blockId) : null;
+                                        const displayBlockName = lastPayment?.blockNameSnapshot || lastBlock?.name || 'N/A';
+
+                                        return (
+                                            <Draggable key={p.id} draggableId={String(p.id)} index={index} isDragDisabled={!isDraggable}>
+                                                {(provided, snapshot) => (
+                                                    <tr
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        className={`hover:bg-gray-700 ${snapshot.isDragging ? 'bg-gray-700 shadow-xl border border-teal-500' : ''}`}
+                                                    >
+                                                        {isDraggable && (
+                                                            <td className="px-2 py-4 whitespace-nowrap text-center" {...provided.dragHandleProps}>
+                                                                <div className="flex justify-center items-center h-full">
+                                                                    <GripVerticalIcon />
+                                                                </div>
+                                                            </td>
+                                                        )}
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{p.name}</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            {lastPayment ? new Date(lastPayment.paymentDate).toLocaleDateString('ru-RU') : '---'}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            <div>{displayBlockName}</div>
+                                                            {p.activeUntil && (
+                                                                <div className={`text-xs mt-1 ${new Date(p.activeUntil) >= new Date().setHours(0, 0, 0, 0) ? 'text-green-400' : 'text-red-400'}`}>
+                                                                    До: {new Date(p.activeUntil).toLocaleDateString('ru-RU')}
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                            <button onClick={() => handleOpenHistory(p)} className="text-blue-400 hover:text-blue-500 mr-4" title="История оплат"><HistoryIcon /></button>
+                                                            <button onClick={() => handleOpenPaymentModal(p)} className="text-orange-400 hover:text-orange-500 mr-4"><EditIcon /></button>
+                                                            {activeTab === 'active' ? (
+                                                                <button onClick={() => toggleArchiveStatus(p.id, true)} className="text-red-400 hover:text-red-500" title="Архивировать">
+                                                                    <ArchiveIcon />
+                                                                </button>
+                                                            ) : (
+                                                                <>
+                                                                    <button onClick={() => toggleArchiveStatus(p.id, false)} className="text-green-400 hover:text-green-500 mr-4" title="Восстановить">
+                                                                        <RestoreIcon />
+                                                                    </button>
+                                                                    <button onClick={() => setParticipantToDelete(p)} className="text-red-400 hover:text-red-500" title="Удалить навсегда">
+                                                                        <DeleteIcon />
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </Draggable>
+                                        )
+                                    })}
+                                    {provided.placeholder}
+                                </tbody>
+                            )}
+                        </Droppable>
+                    </table>
+                </DragDropContext>
             </div>
 
             <Modal show={showAddParticipantModal} onClose={handleCloseModals} title="Добавить участника">
@@ -217,17 +290,53 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
                     <div className="border-t border-gray-700 pt-4 mt-4">
                         <h4 className="text-sm font-medium text-gray-400 mb-2">Добавить оплату (опционально)</h4>
                         <div className="space-y-3">
-                            <select
-                                name="blockId"
-                                value={newPaymentData.blockId}
-                                onChange={(e) => setNewPaymentData({ ...newPaymentData, blockId: e.target.value })}
-                                className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500"
-                            >
-                                <option value="">Выберите блок</option>
-                                {safeBlocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                            </select>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    id="isCustom"
+                                    checked={newPaymentData.isCustom || false}
+                                    onChange={(e) => setNewPaymentData({ ...newPaymentData, isCustom: e.target.checked })}
+                                    className="w-4 h-4 text-orange-600 bg-gray-700 border-gray-600 rounded focus:ring-orange-500 ring-offset-gray-800"
+                                />
+                                <label htmlFor="isCustom" className="ml-2 text-sm text-gray-300">Произвольная сумма и количество</label>
+                            </div>
 
-                            {newPaymentData.blockId && (
+                            {!newPaymentData.isCustom ? (
+                                <select
+                                    name="blockId"
+                                    value={newPaymentData.blockId}
+                                    onChange={(e) => setNewPaymentData({ ...newPaymentData, blockId: e.target.value })}
+                                    className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                                >
+                                    <option value="">Выберите блок</option>
+                                    {safeBlocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                </select>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs text-gray-400 mb-1">Сумма (₽)</label>
+                                        <input
+                                            type="number"
+                                            value={newPaymentData.customAmount}
+                                            onChange={(e) => setNewPaymentData({ ...newPaymentData, customAmount: e.target.value })}
+                                            className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-400 mb-1">Количество</label>
+                                        <input
+                                            type="number"
+                                            value={newPaymentData.customCount}
+                                            onChange={(e) => setNewPaymentData({ ...newPaymentData, customCount: e.target.value })}
+                                            className="w-full p-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {(newPaymentData.blockId || (newPaymentData.isCustom && newPaymentData.customAmount && newPaymentData.customCount)) && (
                                 <div>
                                     <label htmlFor="paymentDate" className="block text-sm font-medium text-gray-300">Дата оплаты</label>
                                     <input
