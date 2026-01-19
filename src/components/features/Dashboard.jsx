@@ -7,9 +7,15 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
     const trainingsThisMonth = Object.keys(attendance).filter(key => {
         const parts = key.split('-');
         if (parts.length !== 4) return false;
+
+        const participantId = parseInt(parts[0], 10);
         const year = parseInt(parts[1], 10);
         const month = parseInt(parts[2], 10);
-        return attendance[key] === true && year === selectedYear && month === selectedMonth;
+
+        // Check if participant exists
+        const participantExists = participants.some(p => p.id === participantId);
+
+        return attendance[key] === true && year === selectedYear && month === selectedMonth && participantExists;
     }).length;
 
     // Используем реальное значение rentAmount или 50000 по умолчанию
