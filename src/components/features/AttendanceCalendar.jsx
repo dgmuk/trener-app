@@ -138,7 +138,16 @@ const AttendanceCalendar = ({ participants, setParticipants, blocks, attendance,
                                                         {p.isTimeBased ? (
                                                             <p className={`text-sm font-bold ${p.isExpired ? 'text-red-400' : 'text-green-400'}`}>
                                                                 {p.isExpired ? 'Истек: ' : 'Активен до: '}
-                                                                {p.activeUntil ? new Date(p.activeUntil).toLocaleDateString('ru-RU') : '---'}
+                                                                {(() => {
+                                                                    if (!p.activeUntil) return '---';
+                                                                    try {
+                                                                        const [year, month, day] = p.activeUntil.split('-');
+                                                                        if (year && month && day) return `${day}.${month}.${year}`;
+                                                                        return new Date(p.activeUntil).toLocaleDateString('ru-RU');
+                                                                    } catch (e) {
+                                                                        return p.activeUntil || '---';
+                                                                    }
+                                                                })()}
                                                             </p>
                                                         ) : (
                                                             <p className="text-sm font-bold text-orange-400">Осталось тренировок: {p.remainingSessions}</p>
