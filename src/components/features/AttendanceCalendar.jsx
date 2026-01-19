@@ -38,7 +38,8 @@ const AttendanceCalendar = ({ participants, blocks, attendance, setAttendance, s
                 const participantPayments = p.payments || [];
                 const totalSessions = participantPayments.reduce((sum, payment) => {
                     const block = blocks.find(b => b.id === payment.blockId);
-                    return sum + (block ? block.trainingCount : 0);
+                    const count = payment.trainingCountSnapshot !== undefined ? payment.trainingCountSnapshot : (block ? block.trainingCount : 0);
+                    return sum + count;
                 }, 0);
                 const allVisits = attendanceMap[p.id] || [];
                 const totalAttendance = allVisits.length;
@@ -46,7 +47,8 @@ const AttendanceCalendar = ({ participants, blocks, attendance, setAttendance, s
                 const attendedThisMonth = allVisits.filter(att => att.year === selectedDate.getFullYear() && att.month === selectedDate.getMonth()).length;
                 const lastPayment = participantPayments.length > 0 ? participantPayments[participantPayments.length - 1] : null;
                 const lastBlock = lastPayment ? blocks.find(b => b.id === lastPayment.blockId) : null;
-                return { ...p, blockName: lastBlock ? lastBlock.name : "Блок не назначен", attendedThisMonth, remainingSessions };
+                const blockName = lastPayment?.blockNameSnapshot || lastBlock?.name || "Блок не назначен";
+                return { ...p, blockName, attendedThisMonth, remainingSessions };
             });
         setParticipantsData(processedData);
     }, [selectedDate, participants, blocks, attendance]);
@@ -62,15 +64,27 @@ const AttendanceCalendar = ({ participants, blocks, attendance, setAttendance, s
     return (
         <div>
             <h1 className="text-3xl font-bold text-white mb-4">Календарь посещений</h1>
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700 space-y-4 md:space-y-0">
-                <div className="flex items-center space-x-1 sm:space-x-2 order-2 md:order-1">
-                    <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-2 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">{'«'}</button>
-                    <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{'<'}</button>
-                </div>
-                <h2 className="text-lg sm:text-2xl font-semibold w-full md:w-48 text-center capitalize text-white order-1 md:order-2 mb-2 md:mb-0">{selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}</h2>
-                <div className="flex items-center space-x-1 sm:space-x-2 order-3 md:order-3">
-                    <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">{'>'}</button>
-                    <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-2 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">{'»'}</button>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
+                {/* Mobile Title */}
+                <h2 className="md:hidden text-xl font-bold text-center capitalize text-white mb-4 w-full order-1">
+                    {selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}
+                </h2>
+
+                <div className="flex w-full md:w-auto justify-between md:justify-start items-center order-2 md:order-1 md:space-x-2">
+                    <div className="flex space-x-2">
+                        <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() - 1))} className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold transition-colors">«</button>
+                        <button onClick={() => changeDate(d => d.setMonth(d.getMonth() - 1))} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">{'<'}</button>
+                    </div>
+
+                    {/* Desktop Title */}
+                    <h2 className="hidden md:block text-2xl font-bold text-center capitalize text-white w-48">
+                        {selectedDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}
+                    </h2>
+
+                    <div className="flex space-x-2">
+                        <button onClick={() => changeDate(d => d.setMonth(d.getMonth() + 1))} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">{'>'}</button>
+                        <button onClick={() => changeDate(d => d.setFullYear(d.getFullYear() + 1))} className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold transition-colors">»</button>
+                    </div>
                 </div>
             </div>
 

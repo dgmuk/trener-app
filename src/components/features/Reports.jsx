@@ -21,7 +21,8 @@ const ReportDetails = ({ type, participants, blocks, attendance, rentAmount, onB
 
             const totalIncome = payments.reduce((sum, p) => {
                 const block = blocks.find(b => b.id === p.blockId);
-                return sum + (block ? block.cost : 0);
+                const cost = p.costSnapshot !== undefined ? p.costSnapshot : (block ? block.cost : 0);
+                return sum + cost;
             }, 0);
 
             return { items: payments, total: totalIncome };
@@ -89,12 +90,14 @@ const ReportDetails = ({ type, participants, blocks, attendance, rentAmount, onB
                         {data.items.map((item, i) => {
                             if (type === 'income') {
                                 const block = blocks.find(b => b.id === item.blockId);
+                                const cost = item.costSnapshot !== undefined ? item.costSnapshot : (block ? block.cost : 0);
+                                const blockName = item.blockNameSnapshot || (block ? block.name : 'Н/Д');
                                 return (
                                     <tr key={i} className="hover:bg-gray-700">
                                         <td className="px-6 py-4 text-sm text-gray-300">{new Date(item.paymentDate).toLocaleDateString('ru-RU')}</td>
                                         <td className="px-6 py-4 text-sm font-medium text-white">{item.participantName}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-300">{block ? block.name : 'Н/Д'}</td>
-                                        <td className="px-6 py-4 text-sm text-right font-bold text-green-500">{block ? block.cost : 0} ₽</td>
+                                        <td className="px-6 py-4 text-sm text-gray-300">{blockName}</td>
+                                        <td className="px-6 py-4 text-sm text-right font-bold text-green-500">{cost} ₽</td>
                                     </tr>
                                 );
                             } else {
@@ -138,7 +141,8 @@ const Reports = ({ participants, blocks, attendance, rentAmount }) => {
             return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
         }).reduce((s, pay) => {
             const b = blocks.find(bl => bl.id === pay.blockId);
-            return s + (b ? b.cost : 0);
+            const cost = pay.costSnapshot !== undefined ? pay.costSnapshot : (b ? b.cost : 0);
+            return s + cost;
         }, 0);
     }, 0);
 

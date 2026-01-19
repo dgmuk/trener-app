@@ -22,8 +22,10 @@ const Dashboard = ({ participants, blocks, attendance, selectedDate, rentAmount 
         });
 
         const incomeFromParticipant = paymentsInMonth.reduce((sum, payment) => {
+            // Use snapshot cost OR fallback to block cost OR 0
             const block = blocks.find(b => b.id === payment.blockId);
-            return sum + (block ? block.cost : 0);
+            const cost = payment.costSnapshot !== undefined ? payment.costSnapshot : (block ? block.cost : 0);
+            return sum + cost;
         }, 0);
 
         return acc + incomeFromParticipant;

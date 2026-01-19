@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
@@ -12,6 +12,8 @@ import Blocks from './components/features/Blocks';
 import Reports from './components/features/Reports';
 import Charts from './components/features/Charts';
 
+import Notification from './components/ui/Notification';
+
 // Icons
 import {
     HomeIcon,
@@ -20,6 +22,8 @@ import {
     BlocksIcon,
     ReportsIcon,
     ChartIcon,
+    DownloadIcon,
+    UploadIcon,
     MenuIcon
 } from './components/ui/Icons';
 
@@ -28,6 +32,17 @@ const AppContent = ({ user, initialData }) => {
     const [activePage, setActivePage] = useState('dashboard');
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const fileInputRef = useRef(null);
+    const [notifications, setNotifications] = useState([]);
+
+    const addNotification = (message, type = 'success') => {
+        const id = Date.now();
+        setNotifications(prev => [...prev, { id, message, type }]);
+    };
+
+    const removeNotification = (id) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+    };
 
     const [blocks, setBlocks] = useState(initialData.blocks || []);
     const [participants, setParticipants] = useState(initialData.participants || []);
@@ -70,11 +85,76 @@ const AppContent = ({ user, initialData }) => {
             await signOut(auth);
         } catch (error) {
             console.error("Ошибка выхода:", error);
+            addNotification("Ошибка при выходе", 'error');
         }
     };
 
+    const handleExportData = () => {
+        const dataToExport = {
+            blocks,
+            participants,
+            attendance,
+            rentAmount,
+            exportDate: new Date().toISOString()
+        };
+
+        const jsonString = JSON.stringify(dataToExport, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const href = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = href;
+        link.download = `backup_visitflow_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        addNotification("Резервная копия успешно создана!", 'success');
+    };
+
+    const handleImportData = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+
+                // Basic validation
+                if (!data.blocks || !data.participants || !data.attendance) {
+                    addNotification("Ошибка: Неверный формат файла.", 'error');
+                    return;
+                }
+
+                if (window.confirm("ВНИМАНИЕ: Все текущие данные будут заменены данными из файла. Это действие нельзя отменить. Продолжить?")) {
+                    setBlocks(data.blocks);
+                    setParticipants(data.participants);
+                    setAttendance(data.attendance);
+                    if (data.rentAmount) setRentAmount(data.rentAmount);
+                    addNotification("Данные успешно восстановлены!", 'success');
+                }
+            } catch (error) {
+                console.error("Ошибка при чтении файла:", error);
+                addNotification("Ошибка при чтении файла.", 'error');
+            }
+        };
+        reader.readAsText(file);
+        // Reset file input
+        event.target.value = '';
+    };
+
     const renderPage = () => {
-        const props = { participants, setParticipants, blocks, setBlocks, attendance, setAttendance, rentAmount, setRentAmount, selectedDate, setSelectedDate };
+        const props = {
+            participants, setParticipants,
+            blocks, setBlocks,
+            attendance, setAttendance,
+            rentAmount, setRentAmount,
+            selectedDate, setSelectedDate,
+            addNotification // Pass notification helper
+        };
         switch (activePage) {
             case 'dashboard': return <Dashboard {...props} />;
             case 'calendar': return <AttendanceCalendar {...props} />;
@@ -102,6 +182,14 @@ const AppContent = ({ user, initialData }) => {
 
     return (
         <div className="relative min-h-screen md:flex bg-gray-900 font-sans text-gray-300">
+            {/* Notification Container */}
+            <div className="fixed top-5 right-5 z-50 flex flex-col items-end space-y-2 pointer-events-none">
+                <div className="pointer-events-auto">
+                    {notifications.map(n => (
+                        <Notification key={n.id} {...n} onClose={removeNotification} />
+                    ))}
+                </div>
+            </div>
             <div className="md:hidden flex justify-between items-center p-4 bg-gray-800 border-b border-gray-700">
                 <div className="text-2xl font-bold text-white flex items-center space-x-2">
                     <span>✅</span>
@@ -127,9 +215,32 @@ const AppContent = ({ user, initialData }) => {
                         <NavLink page="charts" icon={<ChartIcon />}>Графики</NavLink>
                     </div>
                 </nav>
-                <div className="mt-auto">
+                <div className="mt-auto space-y-4">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                        accept=".json"
+                    />
+                    <button
+                        onClick={handleImportData}
+                        className="flex items-center space-x-3 px-4 py-2 rounded-lg w-full text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                        title="Восстановить данные из файла"
+                    >
+                        <UploadIcon />
+                        <span className="font-medium">Восстановить</span>
+                    </button>
+                    <button
+                        onClick={handleExportData}
+                        className="flex items-center space-x-3 px-4 py-2 rounded-lg w-full text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                        title="Скачать резервную копию данных"
+                    >
+                        <DownloadIcon />
+                        <span className="font-medium">Резервная копия</span>
+                    </button>
                     <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-900">
-                        <img className="h-10 w-10 rounded-full" src={`https://placehold.co/100x100/374151/D1D5DB?text=${user.email[0].toUpperCase()}`} alt="User" />
+                        <img className="h-10 w-10 rounded-full object-cover" src={user.photoURL || `https://placehold.co/100x100/374151/D1D5DB?text=${user.email[0].toUpperCase()}`} alt="User" />
                         <div>
                             <p className="font-semibold text-white text-sm truncate">{user.email}</p>
                             <button onClick={handleSignOut} className="text-sm text-orange-400 hover:underline">Выйти</button>
