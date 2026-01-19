@@ -149,7 +149,15 @@ const Reports = ({ participants, blocks, attendance, rentAmount }) => {
 
     const visitsThisMonth = Object.keys(attendance).filter(key => {
         const parts = key.split('-');
-        return parseInt(parts[1]) === currentYear && parseInt(parts[2]) === currentMonth && attendance[key];
+        if (parts.length !== 4) return false;
+
+        const participantId = parseInt(parts[0], 10);
+        const year = parseInt(parts[1], 10);
+        const month = parseInt(parts[2], 10);
+
+        const participantExists = participants.some(p => p.id === participantId);
+
+        return year === currentYear && month === currentMonth && attendance[key] && participantExists;
     }).length;
 
     return (
