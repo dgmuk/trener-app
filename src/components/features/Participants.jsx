@@ -79,6 +79,10 @@ const Participants = ({ participants, setParticipants, blocks, attendance, setAt
                         const newExpiry = new Date(paymentDate);
                         newExpiry.setDate(newExpiry.getDate() + (parseInt(block.duration) || 0));
 
+                        const yyyy = newExpiry.getFullYear();
+                        const mm = String(newExpiry.getMonth() + 1).padStart(2, '0');
+                        const dd = String(newExpiry.getDate()).padStart(2, '0');
+                        updatedParticipant.activeUntil = `${yyyy}-${mm}-${dd}`;
                         updatedParticipant.subscriptionType = 'time';
                     }
                 }
